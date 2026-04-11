@@ -7,7 +7,10 @@
   "plugins": [
     {
       "name": "task-driven-ai-dev",
-      "source": ".",
+      "source": {
+        "source": "github",
+        "repo": "zhaohuanke123/task-driven-ai-dev"
+      },
       "description": "Turn a repository into a task-driven AI delivery loop with durable planning artifacts, guarded single-task execution, progress logging, and validation gates."
     }
   ]
