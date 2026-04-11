@@ -1,0 +1,21 @@
+{
+  "project": "replace-with-project-name",
+  "description": "replace-with-project-goal",
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Example task",
+      "description": "One bounded outcome for a single guarded iteration",
+      "steps": [
+        "Describe the implementation step",
+        "Describe the required validation step"
+      ],
+      "priority": "high",
+      "dependencies": [],
+      "passes": false,
+      "blocked": false,
+      "blocked_reason": "",
+      "validation_notes": []
+    }
+  ]
+}

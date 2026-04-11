@@ -1,0 +1,29 @@
+# Progress Log
+
+## [YYYY-MM-DD] - Task: [task title]
+
+### What was done:
+- [specific code or config changes]
+
+### Testing:
+- [commands and browser checks]
+
+### Notes:
+- [important context for future agents]
+
+---
+
+## [YYYY-MM-DD] - Blocked: [task title]
+
+### What was done:
+- [partial work completed]
+
+### Blocking reason:
+- [exact issue preventing safe completion]
+
+### Human action required:
+1. [step one]
+2. [step two]
+
+### Resume hint:
+- [command or artifact to check before continuing]

@@ -1,0 +1,23 @@
+{
+  "project_name": "replace-with-project-name",
+  "app_root": ".",
+  "artifacts": {
+    "architecture": "architecture.md",
+    "tasks": "task.json",
+    "progress": "progress.txt"
+  },
+  "bootstrap_commands": [],
+  "dev_server_commands": [],
+  "validation_commands": [],
+  "browser_test_required_when": [
+    "new pages",
+    "rewritten flows",
+    "core interaction changes",
+    "async job UX changes"
+  ],
+  "blocking_prerequisites": [
+    "external API keys",
+    "hosted services",
+    "test accounts"
+  ]
+}
