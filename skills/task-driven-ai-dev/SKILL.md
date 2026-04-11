@@ -47,7 +47,17 @@ See `references/artifact-model.md` for the detailed contract and template usage.
 - Do not bundle unrelated tasks only to reduce session count.
 - When the backlog is complete and new defects appear, record them as explicit bugfix tasks or clearly separate them in progress history.
 
-### 4. Execute one guarded iteration
+### 4. Decide: local or delegated?
+
+Before implementing, check the task nature:
+
+- **Research with multiple independent targets** → Launch parallel subagents (e.g., "research Cursor, Windsurf, and Continue UX")
+- **Isolated implementation with clear scope** → Consider worker subagent
+- **Tiny or tightly coupled to current context** → Stay local
+
+See `references/subagent-orchestration.md` for recommended subagent roles (selection, worker, verification).
+
+### 5. Execute one guarded iteration
 
 - Bootstrap the environment only as needed.
 - Implement the chosen task.
@@ -58,14 +68,6 @@ See `references/artifact-model.md` for the detailed contract and template usage.
 
 See `references/workflow-contract.md` for the full iteration protocol.
 
-### 5. Replace shell loops with orchestration
-
-- Do not run blind `for` loops over agent sessions.
-- Use a main agent to own state, task selection, and final judgment.
-- Use subagents only for bounded roles: selection analysis, implementation, independent verification.
-- Treat each iteration as an explicit handoff with a stop condition.
-
-See `references/subagent-orchestration.md` before designing agent delegation.
 
 ## Guardrails
 
@@ -87,7 +89,7 @@ Load `references/lessons-from-history.md` when hardening an existing harness or 
 - `scripts/validate_iteration.py`: validate task/progress consistency before completion.
 - `references/workflow-contract.md`: one-task iteration protocol and done gate.
 - `references/artifact-model.md`: artifact semantics and field expectations.
-- `references/subagent-orchestration.md`: replacement pattern for shell-run loops.
+- `references/subagent-orchestration.md`: recommended subagent roles and delegation patterns.
 - `references/lessons-from-history.md`: failure modes extracted from a real long-running AI-built repo.
 
 ## Output Expectations
