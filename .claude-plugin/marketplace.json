@@ -1,10 +1,10 @@
 {
-  "name": "task-driven-ai-dev",
+  "name": "vanko-skill",
   "owner": {
     "name": "zhaohuanke123"
   },
   "metadata": {
-    "description": "Turn a repository into a task-driven AI delivery loop with durable planning artifacts, guarded single-task execution, progress logging, and validation gates.",
+    "description": "Vanko's personal Claude Code skills marketplace - a collection of AI development utilities.",
     "version": "1.0.0"
   },
   "plugins": [

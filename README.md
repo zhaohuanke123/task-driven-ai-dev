@@ -1,9 +1,14 @@
-# Task-Driven AI Dev Plugin
+# Vanko Skill
 
-A Claude Code plugin that turns a repository into a task-driven AI delivery loop with durable planning artifacts, guarded single-task execution, progress logging, and validation gates.
+A Claude Code skills marketplace containing personal AI development utilities.
 
-## Features
+## Available Skills
 
+### task-driven-ai-dev
+
+Turn a repository into a task-driven AI delivery loop with durable planning artifacts, guarded single-task execution, progress logging, and validation gates.
+
+**Features:**
 - **Architecture Documentation**: Maintain system overview, constraints, and integration boundaries
 - **Task Management**: Track backlog with dependencies, blocked state, and validation notes
 - **Progress Logging**: Dated execution log with testing evidence
@@ -15,15 +20,15 @@ A Claude Code plugin that turns a repository into a task-driven AI delivery loop
 ### From GitHub Marketplace
 
 ```shell
-/plugin marketplace add zhaohuanke123/task-driven-ai-dev
-/plugin install task-driven-ai-dev@zhaohuanke123-task-driven-ai-dev
+/plugin marketplace add zhaohuanke123/vanko-skill
+/plugin install task-driven-ai-dev@zhaohuanke123-vanko-skill
 ```
 
 ### Local Development
 
 ```bash
-git clone https://github.com/zhaohuanke123/task-driven-ai-dev.git
-claude --plugin-dir ./task-driven-ai-dev
+git clone https://github.com/zhaohuanke123/vanko-skill.git
+claude --plugin-dir ./vanko-skill
 ```
 
 ## Usage
@@ -32,9 +37,9 @@ claude --plugin-dir ./task-driven-ai-dev
 /task-driven-ai-dev:task-driven-ai-dev
 ```
 
-## Required Artifacts
+## Required Artifacts (for task-driven-ai-dev)
 
-The plugin expects the following files in your project:
+The skill expects the following files in your project:
 
 | File | Purpose |
 |------|---------|
