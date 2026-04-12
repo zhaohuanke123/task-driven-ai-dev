@@ -1,17 +1,21 @@
 {
   "name": "task-driven-ai-dev",
-  "description": "Turn a repository into a task-driven AI delivery loop with durable planning artifacts, guarded single-task execution, progress logging, and validation gates.",
   "owner": {
     "name": "zhaohuanke123"
+  },
+  "metadata": {
+    "description": "Turn a repository into a task-driven AI delivery loop with durable planning artifacts, guarded single-task execution, progress logging, and validation gates.",
+    "version": "1.0.0"
   },
   "plugins": [
     {
       "name": "task-driven-ai-dev",
-      "source": {
-        "source": "github",
-        "repo": "zhaohuanke123/task-driven-ai-dev"
-      },
-      "description": "Turn a repository into a task-driven AI delivery loop with durable planning artifacts, guarded single-task execution, progress logging, and validation gates."
+      "description": "Turn a repository into a task-driven AI delivery loop with durable planning artifacts, guarded single-task execution, progress logging, and validation gates.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/task-driven-ai-dev"
+      ]
     }
   ]
 }
