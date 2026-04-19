@@ -108,6 +108,8 @@ claude --plugin-dir ./vanko-skill
 |------|---------|
 | `进度.md` | Learning progress and current state |
 | `知识图谱.md` | Learning path and concept relationships |
+| `参考资料.md` | Source materials library for the topic |
+| `books/` | Local books and documents (PDF, MD, TXT) |
 | `XX_标题.md` | Course files with content and checkpoint records |
 | `config.json` | Learning directory and teaching settings |
 

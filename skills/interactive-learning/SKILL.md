@@ -69,6 +69,10 @@ description: |
 ├── Python基础\
 │   ├── 进度.md
 │   ├── 知识图谱.md
+│   ├── 参考资料.md               ← 主题参考资料库
+│   ├── books/                    ← 本地书籍/文档存放
+│   │   ├── Python编程从入门到实践.pdf
+│   │   └── fluent-python.pdf
 │   ├── visuals/                    ← 交互式可视化组件
 │   │   ├── 01_作用域链.html
 │   │   └── 02_闭包原理.html
@@ -79,6 +83,8 @@ description: |
 └── 机器学习\
     ├── 进度.md
     ├── 知识图谱.md
+    ├── 参考资料.md
+    ├── books/
     └── ...
 ```
 
@@ -213,6 +219,39 @@ description: |
 ### 第一步半：处理来源材料
 
 **详细文档：** `docs/source-management.md`
+
+**来源材料获取优先级：**
+1. 用户发起学习时口头提供
+2. 主题文件夹中的 `参考资料.md`
+3. 主题文件夹中的 `books/` 目录
+4. AI 主动搜索（如启用）
+
+**主题文件夹结构：**
+```
+投资理财入门/
+├── 参考资料.md        ← 主题参考资料库
+├── books/            ← 本地书籍/文档
+│   ├── 聪明的投资者.pdf
+│   └── 投资入门.md
+```
+
+**参考资料.md 格式：**
+```markdown
+# 参考资料
+
+## 📚 本地文件
+- ./books/聪明的投资者.pdf
+- ./books/投资入门.md
+
+## 📚 Obsidian笔记
+- [[投资笔记/PE估值]]
+
+## 🌐 网站
+- https://www.investopedia.com/terms/p/price-earningsratio.asp
+
+## 📖 书籍
+- 《证券分析》- Benjamin Graham
+```
 
 用户可通过以下方式提供来源材料：
 ```
