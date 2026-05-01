@@ -65,6 +65,14 @@ def progress_mentions_task(progress_text: str, task: dict[str, Any]) -> bool:
     return any(normalize(probe) in normalized_progress for probe in probes)
 
 
+def progress_mentions_documentation_skip(progress_text: str, task: dict[str, Any]) -> bool:
+    """Check if progress.txt records an explicit documentation skip for the task."""
+    normalized_progress = normalize(progress_text)
+    if "documentation skip" not in normalized_progress and "docs updated: skipped" not in normalized_progress:
+        return False
+    return progress_mentions_task(progress_text, task)
+
+
 def validate_dependencies(tasks: list[dict[str, Any]]) -> list[str]:
     """Validate task dependencies."""
     errors: list[str] = []
@@ -82,10 +90,23 @@ def validate_dependencies(tasks: list[dict[str, Any]]) -> list[str]:
 def validate_task(progress_text: str, task: dict[str, Any]) -> list[str]:
     """Validate a single task."""
     errors: list[str] = []
+    for field in ("requirement_ref", "design_ref", "docs_updated", "implementation_done", "verified"):
+        if field not in task:
+            errors.append(f"task must include {field!r} for documentation-gated workflow")
+    for field in ("requirement_ref", "design_ref"):
+        if field in task and not str(task.get(field, "")).strip():
+            errors.append(f"task must include a non-empty {field!r}")
     if task.get("passes", False) and task.get("blocked", False):
         errors.append("task cannot be both passed and blocked")
     if task.get("passes", False) and not progress_mentions_task(progress_text, task):
         errors.append("passed task is not mentioned in progress log")
+    if task.get("passes", False) and not task.get("implementation_done", False):
+        errors.append("passed task must have implementation_done=true")
+    if task.get("passes", False) and not task.get("verified", False):
+        errors.append("passed task must have verified=true")
+    if task.get("passes", False) and not task.get("docs_updated", False):
+        if not progress_mentions_documentation_skip(progress_text, task):
+            errors.append("passed task must have docs_updated=true or an explicit documentation skip in progress log")
     if not isinstance(task.get("steps", []), list) or not task.get("steps"):
         errors.append("task must include a non-empty steps array")
     return errors

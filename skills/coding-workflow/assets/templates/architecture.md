@@ -32,9 +32,15 @@
 ```
 /
 ├── AGENTS.md              # 导航入口（subagent 首先读取）
+├── WORKFLOW.md            # 工作流程和 Documentation Gate
+├── PROJECT.md             # 项目状态（如使用 software-dev）
+├── docs/                  # 文档先行体系（如使用 software-dev）
+│   ├── requirements.md    # 行为和范围要求
+│   ├── design.md          # 模块设计和接口契约
+│   └── architecture.md    # 系统架构和数据流
 ├── architecture.md        # 本文件 - 架构约束
-├── task.json              # 任务定义
-├── progress.txt           # 开发历史
+├── task.json              # 任务定义和文档引用
+├── progress.txt           # 开发历史、文档更新、测试证据
 ├── init.sh                # 环境初始化脚本
 ├── src/
 │   ├── app/               # [例如: Next.js App Router 页面]

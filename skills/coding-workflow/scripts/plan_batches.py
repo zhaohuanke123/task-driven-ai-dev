@@ -119,6 +119,11 @@ def format_batches(batches: list[list[dict[str, Any]]]) -> dict[str, Any]:
                 "title": task.get("title", ""),
                 "description": task.get("description", ""),
                 "steps": task.get("steps", []),
+                "requirement_ref": task.get("requirement_ref", ""),
+                "design_ref": task.get("design_ref", ""),
+                "docs_updated": task.get("docs_updated", False),
+                "implementation_done": task.get("implementation_done", False),
+                "verified": task.get("verified", False),
                 "branch": f"feature/task-{tid}",
                 "worktree": f".worktrees/task-{tid}",
                 "files": task.get("files", []),
@@ -134,6 +139,9 @@ def print_text(output: dict[str, Any]) -> None:
             print(f"  Task #{task['id']}: {task['title']}")
             print(f"    Branch:   {task['branch']}")
             print(f"    Worktree: {task['worktree']}")
+            print(f"    Requirement: {task['requirement_ref'] or '[missing]'}")
+            print(f"    Design:      {task['design_ref'] or '[missing]'}")
+            print(f"    Docs updated: {task['docs_updated']}")
             if task["files"]:
                 print(f"    Files:    {', '.join(task['files'])}")
             for step in task["steps"]:

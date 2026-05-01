@@ -29,10 +29,12 @@ Orchestrator（主代理）
 
 当用户说 "继续"、"下一个任务"、"开发"：
 
-1. 读取 `task.json` 获取任务列表
-2. 读取 `progress.txt` 了解当前进度
-3. 运行依赖分析选择可执行任务
-4. 执行任务（见下方执行流程）
+1. 读取 `PROJECT.md`（如存在）获取阶段、版本、恢复上下文
+2. 读取 `task.json` 获取任务列表和文档引用
+3. 读取 `progress.txt` 了解当前进度
+4. 运行依赖分析选择可执行任务
+5. 执行 Documentation Gate
+6. 执行任务（见下方执行流程）
 
 ### Mode 2: Status
 
@@ -47,18 +49,61 @@ Orchestrator（主代理）
 当用户指定任务 ID 或描述：
 
 1. 在 `task.json` 中定位任务
-2. 作为单任务批次执行
+2. 检查任务的 `requirement_ref`、`design_ref`、`docs_updated`
+3. 作为单任务批次执行
+
+### Mode 4: Bug / Behavior Fix
+
+当用户说 "bug"、"有问题"、"不对"、"修一下"、"改成..."：
+
+1. 读取 `PROJECT.md`（如存在）、`task.json`、`progress.txt`
+2. 定位相关需求、设计、架构文档
+3. 判断类型：
+   - 文档已定义正确行为但代码不符：记录为 implementation bug
+   - 用户请求新行为或变更：先更新需求/设计/架构文档
+   - 没有对应文档：先创建或补齐最小文档说明
+4. Documentation Gate 通过后才进入源码修改
 
 ---
 
 ## Orchestrator 执行流程
 
-### Step 1: 架构约束检查
+### Step 1: Documentation Gate
+
+**源码修改前必须通过**。如果未通过，禁止创建 executor 或编辑源码。
+
+必须读取：
+
+```
+1. PROJECT.md（如存在）- 当前阶段、版本、恢复上下文
+2. task.json - 任务、依赖、requirement_ref、design_ref
+3. progress.txt - 已完成工作、测试证据、跳过文档记录
+4. docs/requirements.md - 行为和范围要求（如存在）
+5. docs/design.md - 模块设计和接口契约（如存在）
+6. docs/architecture.md 或 architecture.md - 架构边界
+```
+
+通过条件：
+
+| 检查项 | 通过标准 |
+|--------|----------|
+| 任务文档引用 | 当前任务有 `requirement_ref` 和 `design_ref`，或有明确的等价文档章节 |
+| 行为定义 | bug/feature/behavior change 的预期行为已写入需求或设计 |
+| 文档更新 | 如果行为变化，相关文档已先更新，任务 `docs_updated` 为 `true` |
+| 跳过记录 | 如果用户确认跳过文档，`PROJECT.md` 或 `progress.txt` 记录了原因、风险、待补文档 |
+
+未通过时：
+
+1. 不进入源码实现。
+2. 先更新相关文档或记录显式跳过。
+3. 在 `progress.txt` 记录 Documentation Gate 的状态。
+
+### Step 2: 架构约束检查
 
 **编码前必须读取**：
 
 ```
-1. architecture.md - 获取技术栈、目录结构、禁止事项
+1. docs/architecture.md 或 architecture.md - 获取技术栈、目录结构、禁止事项
 2. 确认理解关键约束
 ```
 
@@ -70,7 +115,7 @@ Orchestrator（主代理）
 | 目录结构 | `## Directory Structure` | 代码放置位置 |
 | 禁止事项 | `## Key Constraints` | 什么不能做 |
 
-### Step 2: 任务选择
+### Step 3: 任务选择
 
 使用依赖分析：
 
@@ -80,10 +125,11 @@ python scripts/plan_batches.py --task-file task.json --format json
 
 选择规则：
 - 所有依赖任务必须已完成（`passes: true`）
+- 当前任务必须通过 Documentation Gate
 - 同批次任务无文件冲突
 - 同批次任务无 `conflict_groups` 冲突
 
-### Step 3: Worktree 创建
+### Step 4: Worktree 创建
 
 为每个任务创建隔离工作树：
 
@@ -91,7 +137,7 @@ python scripts/plan_batches.py --task-file task.json --format json
 git worktree add .worktrees/task-<ID> -b feature/task-<ID>
 ```
 
-### Step 4: Spawn Executor 子代理
+### Step 5: Spawn Executor 子代理
 
 为每个任务 spawn 一个 executor 子代理，**所有 executor 并行运行**。
 
@@ -101,12 +147,17 @@ git worktree add .worktrees/task-<ID> -b feature/task-<ID>
 读取 executor.md 获取你的指令。
 
 === 必须首先执行 ===
-1. 读取 architecture.md 获取架构约束
-2. 如果 architecture.md 不存在，报告 BLOCKED
+1. 读取 AGENTS.md、WORKFLOW.md、PROJECT.md（如存在）
+2. 读取任务的 requirement_ref 和 design_ref
+3. 读取 docs/architecture.md 或 architecture.md 获取架构约束
+4. 如果 Documentation Gate 未通过，报告 BLOCKED，不要修改源码
 
 === 你的任务 ===
 - Task ID: <id>
 - Title: <title>
+- Requirement ref: <requirement_ref>
+- Design ref: <design_ref>
+- Docs updated: <docs_updated>
 - Steps:
   <步骤列表>
 
@@ -117,7 +168,7 @@ git worktree add .worktrees/task-<ID> -b feature/task-<ID>
 读取 executor.md 后，按启动协议执行任务。
 ```
 
-### Step 5: 处理 Executor 结果
+### Step 6: 处理 Executor 结果
 
 **如果 completed**：
 - 记录变更文件
@@ -132,7 +183,7 @@ git worktree add .worktrees/task-<ID> -b feature/task-<ID>
   ```
 - 报告阻塞给用户
 
-### Step 6: Spawn Verifier 子代理
+### Step 7: Spawn Verifier 子代理
 
 为每个完成的任务 spawn 一个 verifier 子代理，**所有 verifier 并行运行**。
 
@@ -145,23 +196,27 @@ git worktree add .worktrees/task-<ID> -b feature/task-<ID>
 - Task ID: <id>
 - Title: <title>
 - Steps: <步骤列表>
+- Requirement ref: <requirement_ref>
+- Design ref: <design_ref>
+- Docs updated: <docs_updated>
 - Worktree: .worktrees/task-<id>/
 - Files changed: <文件列表>
 
-读取 verifier.md 后，按验证流程检查实现。
+读取 verifier.md 后，按验证流程检查 docs/code/tests 是否一致。
 ```
 
-### Step 7: 处理 Verifier 结果
+### Step 8: 处理 Verifier 结果
 
 **如果 PASS**：
 - 合并 worktree
 - 更新 task.json 和 progress.txt
+- 将 `docs_updated`、`implementation_done`、`verified`、`passes` 设为 `true`
 
 **如果 FAIL 或 PARTIAL**：
 - 记录失败原因到 progress.txt
 - 清理 worktree（不合并）
 
-### Step 8: 合并或回滚
+### Step 9: 合并或回滚
 
 **验证通过**：
 
@@ -180,7 +235,7 @@ git branch -D feature/task-<ID>
 
 记录失败原因到 `progress.txt`。
 
-### Step 9: 记录和提交
+### Step 10: 记录和提交
 
 更新 `progress.txt`：
 
@@ -190,6 +245,12 @@ git branch -D feature/task-<ID>
 ### What was done:
 - [变更列表]
 
+### Documentation:
+- Requirement ref: [docs/requirements.md#...]
+- Design ref: [docs/design.md#...]
+- Docs updated: yes/no/skipped
+- Skip risk and follow-up docs: [如适用]
+
 ### Testing:
 - [测试结果]
 
@@ -197,7 +258,7 @@ git branch -D feature/task-<ID>
 - [备注]
 ```
 
-更新 `task.json`：将 `passes` 改为 `true`
+更新 `task.json`：将 `docs_updated`、`implementation_done`、`verified`、`passes` 改为 `true`
 
 提交：
 
@@ -233,13 +294,14 @@ git commit -m "complete task #N: [Title]"
 
 ## Guardrails
 
-1. **架构优先** - 编码前必须读取 `architecture.md`
-2. **Worktree 隔离** - 每个任务在独立 worktree 中执行
-3. **验证先于合并** - 验证通过才能合并
-4. **单批次执行** - 每次处理一个批次，汇报结果
-5. **阻塞不伪造** - 无法完成时报告阻塞，不标记完成
-6. **清理 Worktree** - 完成后移除 worktree 和分支
-7. **并行执行** - 同批次任务的 executor 和 verifier 并行运行
+1. **文档先行** - bug、功能、行为变更必须先通过 Documentation Gate
+2. **架构优先** - 编码前必须读取 `docs/architecture.md` 或 `architecture.md`
+3. **Worktree 隔离** - 每个任务在独立 worktree 中执行
+4. **验证先于合并** - 验证通过才能合并
+5. **单批次执行** - 每次处理一个批次，汇报结果
+6. **阻塞不伪造** - 无法完成时报告阻塞，不标记完成
+7. **清理 Worktree** - 完成后移除 worktree 和分支
+8. **并行执行** - 同批次任务的 executor 和 verifier 并行运行
 
 ---
 

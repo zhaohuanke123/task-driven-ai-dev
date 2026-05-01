@@ -7,7 +7,8 @@ A structured development workflow skill for Claude Code, designed for fullstack 
 This skill implements a task-driven development workflow that helps AI agents:
 
 - Work on one task at a time
-- Verify changes with lint, build, and browser tests
+- Require documentation references before source edits
+- Verify changes with lint, build, browser tests, and docs/code/tests consistency checks
 - Maintain persistent state across sessions
 - Handle blocking situations gracefully
 - Commit changes atomically
@@ -33,6 +34,8 @@ cp -r skills/coding-workflow ~/.claude/skills/
 cp skills/coding-workflow/assets/templates/task.json ./task.json
 cp skills/coding-workflow/assets/templates/progress.txt ./progress.txt
 cp skills/coding-workflow/assets/templates/architecture.md ./architecture.md
+cp skills/coding-workflow/assets/templates/AGENTS.md ./AGENTS.md
+cp skills/coding-workflow/assets/templates/WORKFLOW.md ./WORKFLOW.md
 ```
 
 2. **Define your tasks** in `task.json`:
@@ -48,6 +51,11 @@ cp skills/coding-workflow/assets/templates/architecture.md ./architecture.md
       "description": "Initialize project structure",
       "steps": ["Create package.json", "Setup TypeScript", "Configure Tailwind"],
       "passes": false,
+      "requirement_ref": "docs/requirements.md#FR-001",
+      "design_ref": "docs/design.md#Project Structure",
+      "docs_updated": false,
+      "implementation_done": false,
+      "verified": false,
       "priority": "critical"
     }
   ]
@@ -84,12 +92,13 @@ continue
 ```
 
 The agent will:
-1. Read `task.json`
+1. Read `AGENTS.md`, `WORKFLOW.md`, `task.json`, and `progress.txt`
 2. Find the next incomplete task
-3. Implement it
-4. Test and verify
-5. Update `progress.txt`
-6. Commit changes
+3. Pass the Documentation Gate by checking `requirement_ref` and `design_ref`
+4. Implement only documented behavior
+5. Test and verify docs/code/tests consistency
+6. Update `progress.txt`
+7. Commit changes
 
 ### Check Status
 
@@ -112,9 +121,14 @@ Shows:
 
 | File | Purpose |
 |------|---------|
-| `task.json` | Task definitions (source of truth) |
-| `progress.txt` | Development history |
+| `AGENTS.md` | Runtime navigation entry |
+| `WORKFLOW.md` | Execution workflow and Documentation Gate |
+| `task.json` | Task definitions, dependencies, and document references |
+| `progress.txt` | Development history, documentation updates, and skip-risk records |
 | `architecture.md` | System design documentation |
+| `PROJECT.md` | Lifecycle status when used with software-dev |
+| `docs/requirements.md` | Behavior and scope requirements when used with software-dev |
+| `docs/design.md` | Module design and contracts when used with software-dev |
 | `init.sh` | Environment setup script |
 | `CLAUDE.md` | Project-specific instructions |
 
@@ -128,14 +142,17 @@ Shows:
 
 ### 2. Verification Gates
 
+- Every implementation task must have `requirement_ref` and `design_ref`
+- Behavior changes update docs before code unless the user explicitly confirms skipping docs
 - All changes must pass `npm run lint`
 - All changes must pass `npm run build`
 - UI changes require browser testing with MCP Playwright
+- Verifier rejects passing code when docs are missing or stale
 
 ### 3. Persistent State
 
 - `task.json` tracks task completion
-- `progress.txt` preserves context across sessions
+- `progress.txt` preserves context, documentation updates, and testing evidence across sessions
 - Future agents can understand what was done
 
 ### 4. Blocking Protocol
@@ -189,13 +206,15 @@ Options:
 2. **Define dependencies** - Help the agent understand task order
 3. **Provide working init.sh** - Ensure environment is reproducible
 4. **Document architecture** - Help agents understand the system
+5. **Keep requirements/design current** - Tasks should point to the docs they implement
 
 ### For Agents
 
-1. **Read before writing** - Understand existing patterns
-2. **Test thoroughly** - Never skip verification
-3. **Document in progress.txt** - Help future agents
-4. **Block, don't fake** - Be honest about blockers
+1. **Pass the Documentation Gate** - Identify requirement/design references before source edits
+2. **Read before writing** - Understand existing patterns
+3. **Test thoroughly** - Never skip verification
+4. **Document in progress.txt** - Help future agents
+5. **Block, don't fake** - Be honest about blockers
 
 ## License
 

@@ -17,13 +17,14 @@ Turn a repository into a task-driven AI delivery loop with durable planning arti
 
 ### coding-workflow
 
-A structured development workflow for fullstack projects with verification gates, persistent state, and browser testing integration.
+A structured development workflow for fullstack projects with documentation gates, verification gates, persistent state, and browser testing integration.
 
 **Features:**
 - **Task Selection**: Automatically select next incomplete task from task.json
-- **Implementation Guidance**: Follow existing code patterns and conventions
-- **Testing Gates**: Lint, build, and browser testing with MCP Playwright
-- **Progress Documentation**: Persistent session history in progress.txt
+- **Documentation Gate**: Require task-level requirement/design references before implementation
+- **Implementation Guidance**: Follow existing docs, code patterns, and conventions
+- **Testing Gates**: Lint, build, browser testing, and docs/code/tests consistency checks
+- **Progress Documentation**: Persistent session history, documentation updates, and skip-risk records in progress.txt
 - **Blocking Protocol**: Clear handling of tasks that require human intervention
 - **Rollback Support**: Clean recovery from failed implementations
 
@@ -48,9 +49,9 @@ Guides AI agents through the complete software development lifecycle with phase-
 
 **Features:**
 - **10-Phase Lifecycle**: Problem definition → requirements → planning → architecture → design → coding → unit testing → integration → system testing → delivery
-- **Document-First**: Update documentation before implementation; docs, code, and tests must agree
+- **Document-First**: Update documentation before implementation; bug fixes and behavior changes must pass a documentation gate; docs, code, and tests must agree
 - **Progressive Loading**: Compact main file with reference files loaded on demand
-- **Cross-Conversation Persistence**: `PROJECT.md` and `CLAUDE.md` preserve context across sessions
+- **Cross-Conversation Persistence**: `PROJECT.md`, `CLAUDE.md`, `AGENTS.md`, and `WORKFLOW.md` preserve context and runtime workflow across sessions
 - **Git Integration**: Commits, tags, and rollback built into every phase
 - **Recovery Protocol**: Exception handling for missing files, dirty worktrees, and abandoned projects
 
@@ -109,6 +110,8 @@ claude --plugin-dir ./vanko-skill
 |------|---------|
 | `PROJECT.md` | Single source of truth for project state, phase, and version |
 | `CLAUDE.md` | Generic agent entry point for cross-session persistence |
+| `AGENTS.md` | Runtime navigation entry for future agents |
+| `WORKFLOW.md` | Execution workflow and documentation gate |
 | `docs/problem-definition.md` | Problem statement and success criteria |
 | `docs/requirements.md` | Functional and non-functional requirements |
 | `docs/plan.md` | Stack, milestones, risks, version strategy |
@@ -131,8 +134,10 @@ claude --plugin-dir ./vanko-skill
 
 | File | Purpose |
 |------|---------|
-| `task.json` | Task definitions with steps and completion status |
-| `progress.txt` | Session history and context |
+| `AGENTS.md` | Runtime navigation entry |
+| `WORKFLOW.md` | Execution workflow and documentation gate |
+| `task.json` | Task definitions with steps, completion status, and document references |
+| `progress.txt` | Session history, documentation updates, and skip-risk records |
 | `architecture.md` | System design decisions |
 | `init.sh` | Environment setup script |
 

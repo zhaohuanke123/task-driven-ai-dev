@@ -5,8 +5,8 @@ Load this file when entering or revising a lifecycle phase.
 ## Phase 1: Problem Definition
 
 **Output:** `docs/problem-definition.md` plus initialized Git repository or explicit manual
-version-control note, `PROJECT.md`, `CLAUDE.md`, `docs/version-history.md`, and
-`docs/lessons-learned.md`.
+version-control note, `PROJECT.md`, `CLAUDE.md`, `AGENTS.md`, `WORKFLOW.md`,
+`docs/version-history.md`, and `docs/lessons-learned.md`.
 
 Interview the user to understand what they need. Use their language, focus on the problem,
 and ask at most 3-5 focused questions. If the initial request has enough detail, draft the
@@ -167,21 +167,23 @@ handling, coding conventions, and state management.
 
 ## Phase 6: Coding & Debugging
 
-**Output:** Source code in project-standard directories.
+**Output:** Source code in project-standard directories after the documentation gate passes.
 
 Process:
 
 1. Re-read `docs/design.md` and relevant requirements.
-2. Run `git status --short` and identify existing user changes.
-3. If intended implementation differs from docs, update docs first.
-4. Commit approved documentation checkpoints when Git is enabled.
-5. Set up project structure and dependencies.
-6. Implement modules in dependency order.
-7. Smoke test each module before moving on.
-8. Wire modules together and verify the happy path.
-9. Fix integration issues before polishing edge cases.
-10. Update `PROJECT.md` and `CLAUDE.md` if paths, commands, or workflows changed.
-11. Commit coherent implementation slices after verification.
+2. Read `AGENTS.md`/`WORKFLOW.md` when present and pass the Documentation Gate.
+3. Run `git status --short` and identify existing user changes.
+4. If intended implementation differs from docs, update docs first.
+5. Commit approved documentation checkpoints when Git is enabled.
+6. Set up project structure and dependencies.
+7. Implement modules in dependency order.
+8. Smoke test each module before moving on.
+9. Wire modules together and verify the happy path.
+10. Fix integration issues before polishing edge cases.
+11. Update `PROJECT.md`, `CLAUDE.md`, `AGENTS.md`, and `WORKFLOW.md` if paths, commands,
+    gates, or workflows changed.
+12. Commit coherent implementation slices after verification.
 
 Exit gate: the app runs and the core happy path works end to end.
 

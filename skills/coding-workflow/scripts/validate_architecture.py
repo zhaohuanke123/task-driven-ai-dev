@@ -73,7 +73,7 @@ def validate_tech_stack_format(content: str) -> list[str]:
 
     # Check if Tech Stack section exists and has a table
     tech_stack_match = re.search(
-        r"^## Tech Stack\s*\n(.*?)(?=^##|\Z)",
+        r"^## Tech Stack\s*\n(.*?)(?=^##\s|\Z)",
         content,
         re.MULTILINE | re.DOTALL
     )
@@ -95,7 +95,7 @@ def validate_key_constraints(content: str) -> list[str]:
     errors = []
 
     constraints_match = re.search(
-        r"^## Key Constraints\s*\n(.*?)(?=^##|\Z)",
+        r"^## Key Constraints\s*\n(.*?)(?=^##\s|\Z)",
         content,
         re.MULTILINE | re.DOTALL
     )

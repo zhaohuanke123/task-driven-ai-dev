@@ -1,7 +1,8 @@
 # Progress Log
 
 This file tracks development history across agent sessions.
-Each entry documents what was done, how it was tested, and any relevant notes.
+Each entry documents the documentation gate, what was done, how it was tested,
+and any relevant notes.
 
 ---
 ## [YYYY-MM-DD] - Session Start
@@ -10,6 +11,7 @@ Each entry documents what was done, how it was tested, and any relevant notes.
 - Project initialized
 - 0 tasks completed
 - 3 total tasks defined
+- Documentation Gate active
 
 ### Notes:
 - Beginning development cycle
@@ -21,6 +23,12 @@ Each entry documents what was done, how it was tested, and any relevant notes.
 ### What was done:
 - [Specific implementation details]
 - [Files created/modified]
+
+### Documentation:
+- Requirement ref: [docs/requirements.md#...]
+- Design ref: [docs/design.md#...]
+- Docs updated: yes/no/skipped
+- Skip risk and follow-up docs: [Only if user explicitly confirmed skipping docs]
 
 ### Testing:
 - [How tested]
@@ -36,6 +44,11 @@ Each entry documents what was done, how it was tested, and any relevant notes.
 ### Completed work:
 - [What was done before blocking]
 
+### Documentation:
+- Requirement ref: [docs/requirements.md#...]
+- Design ref: [docs/design.md#...]
+- Documentation Gate status: pass/fail/skipped
+
 ### Block reason:
 - [Specific reason]
 
@@ -45,3 +58,15 @@ Each entry documents what was done, how it was tested, and any relevant notes.
 
 ### Resume command:
 - [Command to run after unblocking]
+
+---
+## [YYYY-MM-DD] - Documentation Skip
+
+### User confirmation:
+- [Exact or summarized confirmation to skip docs]
+
+### Risk:
+- [Which docs may be stale and what behavior is undocumented]
+
+### Follow-up docs:
+- [Specific docs/sections to update later]
