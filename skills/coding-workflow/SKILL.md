@@ -1,7 +1,7 @@
 ---
 name: coding-workflow
 description: |
-  项目初始化器 - 部署 Harness Engineering 架构文件和文档先行运行时门禁到项目目录。
+  项目初始化器 - 部署 Harness Engineering 架构文件到项目目录，包含 CLAUDE.md、WORKFLOW.md、architecture.md、task.json、progress.txt。
   TRIGGER when: 用户说 "初始化项目"、"开始新项目"、"部署架构"；项目缺少 CLAUDE.md 或 WORKFLOW.md。
   DO NOT TRIGGER when: 项目已有完整的架构文件（CLAUDE.md + WORKFLOW.md + architecture.md）。
 license: Apache-2.0
@@ -77,7 +77,7 @@ Conflict examples:
 
 ### Step 2: 收集项目信息
 
-**输入**：用户回答（可选）
+**输入**：用户回答（可选，可能已在初始 prompt 中提供）
 
 **操作**：向用户收集以下信息：
 - 项目目标（一句话描述）
@@ -85,11 +85,22 @@ Conflict examples:
 - 核心功能（3-5 个主要功能点）
 - 特殊约束（如有）
 
+**智能处理**：如果用户在初始 prompt 中已提供部分信息（如 "这是一个博客系统，使用 React + Node.js"），则：
+1. 提取已提供的信息，跳过对应询问
+2. 只询问未提供的信息项
+3. 确认提取的信息是否正确
+
 **输出**：项目信息对象
 
 **检查点 2**：逐项询问（或让用户一次性提供）。如果用户选择跳过，使用占位符模板，后续可手动填充。
 
 ### Step 3: 部署架构文件
+
+**前置检查**：确认 skill 的模板和脚本目录存在：
+- `assets/templates/` 目录存在
+- `scripts/` 目录存在
+
+如果缺失，报错并终止。
 
 **输入**：Step 1 检查结果 + Step 2 项目信息
 
