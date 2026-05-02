@@ -19,3 +19,6 @@ Thumbs.db
 
 # Backup files
 *.bak*
+
+.agents/
+.claude/

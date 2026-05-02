@@ -165,34 +165,41 @@ python scripts/validate_architecture.py --architecture-file architecture.md
 | `task.json` | 任务定义、依赖、需求/设计引用 | 需要知道做什么时 |
 | `progress.txt` | 开发历史、文档更新、测试证据 | 需要了解上下文时 |
 
-## 经验教训归档
-
-| 内容 | 写入位置 |
-|------|----------|
-| 当前任务流水、测试证据、阻塞 | `progress.txt` |
-| 当前项目可复用经验 | `docs/lessons-learned.md` |
-| 跨项目、可改进 skill 的经验 | skill 的 `references/lessons-from-history.md` |
-| 去哪里查经验的提醒 | memory |
-
-Memory 不保存经验正文作为唯一来源；它只提醒 agent 去读取对应文件。
-
 ---
 
 ## 模板文件
 
 所有模板位于 `assets/templates/`：
-- `AGENTS.md` - 导航入口模板
-- `WORKFLOW.md` - 工作流程模板（Orchestrator）
-- `executor.md` - Executor 子代理指令模板
-- `verifier.md` - Verifier 子代理指令模板
-- `architecture.md` - 架构约束模板
-- `task.json` - 任务定义模板
-- `progress.txt` - 进度记录模板
+
+| 模板 | 用途 |
+|------|------|
+| `AGENTS.md` | 导航入口模板 |
+| `WORKFLOW.md` | 工作流程模板（Orchestrator） |
+| `executor.md` | Executor 子代理指令模板 |
+| `verifier.md` | Verifier 子代理指令模板 |
+| `architecture.md` | 架构约束模板 |
+| `task.json` | 任务定义模板 |
+| `progress.txt` | 进度记录模板 |
+| `init.sh` | 项目初始化脚本 |
+| `project-config.json` | 项目配置模板 |
 
 ---
 
 ## 验证脚本
 
-- `scripts/validate_architecture.py` - 验证 architecture.md 完整性
-- `scripts/validate_iteration.py` - 验证迭代一致性
-- `scripts/plan_batches.py` - 分析任务依赖和并行批次
+所有脚本位于 `scripts/`：
+
+| 脚本 | 用途 |
+|------|------|
+| `validate_architecture.py` | 验证 architecture.md 完整性 |
+| `validate_iteration.py` | 验证迭代一致性 |
+| `plan_batches.py` | 分析任务依赖和并行批次 |
+| `select_next_task.py` | 选择下一个可执行任务 |
+
+---
+
+## 参考文档
+
+| 文档 | 用途 |
+|------|------|
+| `references/frontend-best-practices.md` | 前端开发最佳实践 |
