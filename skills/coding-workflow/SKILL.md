@@ -66,9 +66,26 @@ Conflict examples:
 - `PROJECT.md`（如项目使用 software-dev 生命周期）
 - `docs/requirements.md`、`docs/design.md`（如项目使用文档先行）
 
-### Step 2: 部署架构文件
+**检查点 1**：如果检测到部分文件已存在：
+1. 列出已存在的文件及其修改时间
+2. 询问用户：「检测到已有架构文件，选择操作：[覆盖/跳过已存在/取消]」
+3. 根据用户选择执行对应操作
 
-如果文件缺失，按以下顺序部署：
+### Step 2: 收集项目信息
+
+在部署 architecture.md 前，向用户收集以下信息：
+
+**检查点 2**：逐项询问（或让用户一次性提供）：
+- 项目目标（一句话描述）
+- 技术栈（语言、框架、数据库等）
+- 核心功能（3-5 个主要功能点）
+- 特殊约束（如有）
+
+如果用户选择跳过，使用占位符模板，后续可手动填充。
+
+### Step 3: 部署架构文件
+
+根据 Step 1 的检查结果，按以下顺序部署：
 
 1. **AGENTS.md** - 项目导航入口（~60行）
    - 使用模板：`assets/templates/AGENTS.md`
@@ -80,7 +97,7 @@ Conflict examples:
 
 3. **architecture.md** - 架构约束
    - 使用模板：`assets/templates/architecture.md`
-   - 向用户收集：项目目标、技术栈、核心功能
+   - 填充 Step 2 收集的项目信息
 
 4. **task.json** - 任务定义模板（如不存在）
    - 使用模板：`assets/templates/task.json`
@@ -91,14 +108,19 @@ Conflict examples:
    - 记录文档更新、测试证据、跳过文档风险
    - 不要用 memory 替代进度记录
 
-### Step 3: 验证部署
+### Step 4: 验证部署
 
 运行验证脚本：
 ```bash
 python scripts/validate_architecture.py --architecture-file architecture.md
 ```
 
-### Step 4: 完成提示
+**检查点 3**：如果验证失败：
+1. 展示错误日志
+2. 询问用户：「验证失败，选择操作：[查看详情并修复/跳过验证/取消]」
+3. 根据选择执行对应操作
+
+### Step 5: 完成提示
 
 告诉用户：
 ```
