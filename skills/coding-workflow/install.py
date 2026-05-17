@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Optional
 
 TEMPLATE_DIR = Path(__file__).resolve().parent / "assets" / "templates"
+AGENTS_DIR = Path(__file__).resolve().parent / "assets" / "agents"
 SCRIPTS_DIR = Path(__file__).resolve().parent / "scripts"
 
 TEMPLATES = [
@@ -31,6 +32,12 @@ TEMPLATES = [
     "architecture.md",
     "task.json",
     "progress.txt",
+]
+
+AGENTS = [
+    "planner.md",
+    "executor.md",
+    "verifier.md",
 ]
 
 
@@ -65,6 +72,9 @@ def check_existing(target: Path) -> list[str]:
     for name in TEMPLATES:
         if (target / name).exists():
             existing.append(name)
+    for name in AGENTS:
+        if (target / ".agents" / name).exists():
+            existing.append(f".agents/{name}")
     return existing
 
 
@@ -92,7 +102,7 @@ def substitute(content: str, info: dict[str, str]) -> str:
 
 
 def deploy(target: Path, info: dict[str, str], overwrite: bool) -> list[str]:
-    """Copy templates to target with placeholder substitution."""
+    """Copy templates and agent definitions to target."""
     deployed = []
     target.mkdir(parents=True, exist_ok=True)
 
@@ -112,6 +122,25 @@ def deploy(target: Path, info: dict[str, str], overwrite: bool) -> list[str]:
         dest.write_text(content, encoding="utf-8")
         deployed.append(name)
         print(f"  Created {name}")
+
+    agents_target = target / ".agents"
+    agents_target.mkdir(parents=True, exist_ok=True)
+
+    for name in AGENTS:
+        dest = agents_target / name
+        if dest.exists() and not overwrite:
+            print(f"  Skipping .agents/{name} (already exists)")
+            continue
+
+        src = AGENTS_DIR / name
+        if not src.exists():
+            print(f"  WARNING: agent definition not found: {src}")
+            continue
+
+        content = src.read_text(encoding="utf-8")
+        dest.write_text(content, encoding="utf-8")
+        deployed.append(f".agents/{name}")
+        print(f"  Created .agents/{name}")
 
     return deployed
 
@@ -183,6 +212,8 @@ def main() -> int:
         return 0
 
     print(f"\nDeployed {len(deployed)} file(s) to {target}")
+    print("  - Project files: CLAUDE.md, architecture.md, task.json, progress.txt")
+    print("  - PEV agents: .agents/planner.md, .agents/executor.md, .agents/verifier.md")
 
     # Validate
     if not args.skip_validation:
@@ -194,6 +225,7 @@ def main() -> int:
 
     print("\nDone.")
     print(f"\nSubsequent development: AI reads CLAUDE.md on new conversations.")
+    print(f"PEV workflow: Planner → Executor → Verifier (see SKILL.md for details).")
     return 0
 
 

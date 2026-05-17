@@ -26,11 +26,18 @@ python install.py --target <project-dir> --name "Project Name" \
   --tech-database "PostgreSQL"
 ```
 
-Deploys 4 files to the target project:
+Deploys project files and PEV agent definitions to the target project:
+
+**Project files (4):**
 - `CLAUDE.md` — Navigation entry point
 - `architecture.md` — Tech stack, directory structure, constraints
 - `task.json` — Task definitions and dependencies
 - `progress.txt` — Progress log and test evidence
+
+**PEV Agent definitions (3):**
+- `.agents/planner.md` — Plan layer: analyzes requirements, generates implementation plans
+- `.agents/executor.md` — Execute layer: implements code per plan
+- `.agents/verifier.md` — Verify layer: writes tests, runs independent review
 
 ## Quick Start
 
@@ -126,6 +133,8 @@ The agent will:
 | Planner | `.agents/planner.md` | Plan | Read, Bash, Grep, Glob | No (read-only) |
 | Executor | `.agents/executor.md` | Execute | Read, Write, Edit, Bash, Grep, Glob, TodoWrite | Implementation files only |
 | Verifier | `.agents/verifier.md` | Verify | Read, Write, Edit, Bash, Grep, Glob | Test files only |
+
+> Agent definitions are stored in `skills/coding-workflow/assets/agents/` and deployed to `.agents/` by `install.py`.
 
 ## Orchestration Flow (10 Steps)
 

@@ -88,11 +88,18 @@ python install.py --target <project-dir> --name "Project Name" \
   --tech-database "PostgreSQL"
 ```
 
-部署 4 个文件到目标项目：
+部署项目文件和 PEV Agent 定义到目标项目：
+
+**项目文件（4 个）：**
 - `CLAUDE.md` — 导航入口，新对话自动读取
 - `architecture.md` — 技术栈、目录结构、约束
 - `task.json` — 任务定义和依赖
 - `progress.txt` — 进度日志和测试证据
+
+**PEV Agent 定义（3 个）：**
+- `.agents/planner.md` — 规划层：分析需求、生成实现计划
+- `.agents/executor.md` — 执行层：按计划编写代码
+- `.agents/verifier.md` — 验证层：编写测试、独立审查
 
 已有项目只需运行一次。后续开发 AI 自动读取这些文件。
 
@@ -314,7 +321,7 @@ git commit -m "complete task #<id>: <title>"
 
 ## 项目文件说明
 
-部署到目标项目的 4 个文件：
+部署到目标项目的文件：
 
 | 文件 | 职责 | AI 读取时机 |
 |------|------|-------------|
@@ -322,6 +329,9 @@ git commit -m "complete task #<id>: <title>"
 | `architecture.md` | 技术栈、目录、约束 | 编码前 |
 | `task.json` | 任务定义和依赖 | 需要知道做什么时 |
 | `progress.txt` | 进度历史和测试证据 | 需要了解上下文时 |
+| `.agents/planner.md` | PEV 规划层 Agent 定义 | 被 Orchestrator spawn 时 |
+| `.agents/executor.md` | PEV 执行层 Agent 定义 | 被 Orchestrator spawn 时 |
+| `.agents/verifier.md` | PEV 验证层 Agent 定义 | 被 Orchestrator spawn 时 |
 
 ## 验证脚本
 
