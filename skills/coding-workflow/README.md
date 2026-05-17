@@ -1,43 +1,40 @@
 # Coding Workflow
 
-A structured development workflow skill for Claude Code, designed for fullstack frontend/backend projects.
+A structured development workflow skill for Claude Code with PEV (Plan-Execute-Verify) three-layer agent architecture.
 
 ## Overview
 
-This skill implements a task-driven development workflow that helps AI agents:
+This skill implements a task-driven development workflow with three specialized AI agents:
 
-- Work on one task at a time
-- Require documentation references before source edits
-- Verify changes with lint, build, browser tests, and docs/code/tests consistency checks
-- Maintain persistent state across sessions
-- Treat memory as a routing hint, not project state
-- Handle blocking situations gracefully
-- Commit changes atomically
+- **Planner** — Analyzes codebase and requirements, generates implementation plans with file ownership maps, acceptance criteria, and test scenarios
+- **Executor** — Implements code according to the Planner's plan in isolated worktrees
+- **Verifier** — Independently writes tests, runs full test suites, and audits docs/code/tests consistency
+
+Key principles:
+- **Plan-Execute-Verify separation** — Planning, coding, and testing are done by independent agents to combat optimistic bias
+- **GAN-like architecture** — Generator (executor) and discriminator (verifier) are physically isolated
+- **File ownership** — Each file has exactly one owner; no two agents modify the same file
+- **Feedback loop** — Verifier failures are sent back to executor with specific fix suggestions (max 2 retries)
 
 ## Installation
 
-Copy this skill to your Claude Code skills directory:
-
 ```bash
-# For project-level use
-cp -r skills/coding-workflow ~/.claude/skills/
-
-# Or keep it in your project
-# The skill will be available when working in this project
+python install.py --target <project-dir> --name "Project Name" \
+  --description "Brief description" \
+  --tech-frontend "React+TypeScript+Tailwind" \
+  --tech-backend "Node.js" \
+  --tech-database "PostgreSQL"
 ```
+
+Deploys 4 files to the target project:
+- `CLAUDE.md` — Navigation entry point
+- `architecture.md` — Tech stack, directory structure, constraints
+- `task.json` — Task definitions and dependencies
+- `progress.txt` — Progress log and test evidence
 
 ## Quick Start
 
-1. **Initialize your project** with the required files:
-
-```bash
-# Copy templates to your project root
-cp skills/coding-workflow/assets/templates/task.json ./task.json
-cp skills/coding-workflow/assets/templates/progress.txt ./progress.txt
-cp skills/coding-workflow/assets/templates/architecture.md ./architecture.md
-cp skills/coding-workflow/assets/templates/AGENTS.md ./AGENTS.md
-cp skills/coding-workflow/assets/templates/WORKFLOW.md ./WORKFLOW.md
-```
+1. **Initialize your project** with the required files (see Installation above)
 
 2. **Define your tasks** in `task.json`:
 
@@ -51,31 +48,47 @@ cp skills/coding-workflow/assets/templates/WORKFLOW.md ./WORKFLOW.md
       "title": "Setup Environment",
       "description": "Initialize project structure",
       "steps": ["Create package.json", "Setup TypeScript", "Configure Tailwind"],
-      "passes": false,
-      "requirement_ref": "docs/requirements.md#FR-001",
-      "design_ref": "docs/design.md#Project Structure",
-      "docs_updated": false,
-      "implementation_done": false,
-      "verified": false,
-      "priority": "critical"
+      "dependencies": [],
+      "done": false,
+      "docs": "docs/requirements.md#FR-001"
     }
   ]
 }
 ```
 
-3. **Create `init.sh`** for environment setup:
-
-```bash
-#!/bin/bash
-set -e
-npm install
-npm run dev &
-```
-
-4. **Invoke the skill**:
+3. **Invoke the skill**:
 
 ```
 /coding-workflow
+```
+
+## PEV Architecture
+
+```
+Orchestrator (SKILL.md)
+    │
+    ▼
+┌─ Layer 1: Planner ─────────────────────┐
+│  Analyze codebase + requirements        │
+│  Output: Implementation Plan            │
+│  + File Ownership + Test Scenarios      │
+│  Permission: read-only                  │
+└────────────────────────────────────────┘
+    │ ready
+    ▼
+┌─ Layer 2: Executor ────────────────────┐
+│  Write code per Planner's plan          │
+│  in isolated worktree                   │
+│  Validation: lint + build only          │
+└────────────────────────────────────────┘
+    │ completed
+    ▼
+┌─ Layer 3: Verifier ────────────────────┐
+│  Write tests + run tests                │
+│  + independent review                   │
+│  FAIL → send fix suggestions to executor│
+└────────────────────────────────────────┘
+    │ PASS → merge | FAIL → retry (max 2)
 ```
 
 ## Usage
@@ -86,23 +99,13 @@ npm run dev &
 /coding-workflow
 ```
 
-or
-
-```
-continue
-```
-
 The agent will:
-1. Read `AGENTS.md`, `WORKFLOW.md`, `task.json`, and `progress.txt`
-2. Find the next incomplete task
-3. Pass the Documentation Gate by checking `requirement_ref` and `design_ref`
-4. Implement only documented behavior
-5. Test and verify docs/code/tests consistency
-6. Update `progress.txt`
-7. Commit changes
-
-Memory may remind the agent to start with `AGENTS.md`, but task state and progress always
-come from repo files.
+1. Read `task.json` and `progress.txt`
+2. Select the next incomplete task
+3. Pass the Documentation Gate
+4. **PEV Flow**: Spawn Planner → Executor → Verifier
+5. Handle verifier feedback (retry if needed)
+6. Merge and commit on PASS
 
 ### Check Status
 
@@ -110,135 +113,65 @@ come from repo files.
 /coding-workflow status
 ```
 
-Shows:
-- Completed vs remaining tasks
-- Current blocking issues
-- Next task to work on
-
 ### Work on Specific Task
 
 ```
 /coding-workflow task 5
 ```
 
+## Agent Definitions
+
+| Agent | File | Layer | Tools | Writes Files |
+|-------|------|-------|-------|-------------|
+| Planner | `.agents/planner.md` | Plan | Read, Bash, Grep, Glob | No (read-only) |
+| Executor | `.agents/executor.md` | Execute | Read, Write, Edit, Bash, Grep, Glob, TodoWrite | Implementation files only |
+| Verifier | `.agents/verifier.md` | Verify | Read, Write, Edit, Bash, Grep, Glob | Test files only |
+
+## Orchestration Flow (10 Steps)
+
+1. **Task Selection** — Pick next task from `task.json`
+2. **Documentation Gate** — Verify docs exist before code changes
+3. **Worktree Creation** — Isolated git worktree per task
+4. **Spawn Planner** — Analyze and generate implementation plan
+5. **Handle Planner Result** — `ready` → proceed, `blocked` → report
+6. **Spawn Executor** — Implement per plan (lint + build only)
+7. **Handle Executor Result** — `completed` → verify, `blocked` → report
+8. **Spawn Verifier** — Write tests, run tests, independent review
+9. **Handle Verifier Result** — PASS → merge; FAIL → retry (max 2 rounds)
+10. **Commit** — Update `task.json` and `progress.txt`
+
 ## Project Files
 
 | File | Purpose |
 |------|---------|
-| `AGENTS.md` | Runtime navigation entry |
-| `WORKFLOW.md` | Execution workflow and Documentation Gate |
-| `task.json` | Task definitions, dependencies, and document references |
-| `progress.txt` | Development history, documentation updates, and skip-risk records |
-| `architecture.md` | System design documentation |
-| `PROJECT.md` | Lifecycle status when used with software-dev |
-| `docs/requirements.md` | Behavior and scope requirements when used with software-dev |
-| `docs/design.md` | Module design and contracts when used with software-dev |
-| `init.sh` | Environment setup script |
-| `CLAUDE.md` | Project-specific instructions |
+| `CLAUDE.md` | Navigation entry point (auto-loaded) |
+| `architecture.md` | Tech stack, directory structure, constraints |
+| `task.json` | Task definitions and dependencies |
+| `progress.txt` | Development history, test evidence, blocks |
+| `docs/requirements.md` | Behavior and scope requirements |
+| `docs/design.md` | Module design and contracts |
 
-## Memory Adapter
+## Memory Rules
 
-Recommended memory:
+Memory is routing, not state. When memory conflicts with repo files, trust repo files:
 
-```text
-For projects using software-dev/coding-workflow: read AGENTS.md first, then PROJECT.md and WORKFLOW.md. Memory is only a routing hint; repo files are the source of truth. Pass the Documentation Gate before source edits.
 ```
-
-Memory must not store project state as the only source. If memory conflicts with `task.json`,
-`progress.txt`, `PROJECT.md`, or `docs/*`, trust repo files.
-
-## Lesson Routing
-
-| Content | Location |
-|---------|----------|
-| Current task timeline, testing evidence, blocks | `progress.txt` |
-| Reusable project lessons | `docs/lessons-learned.md` |
-| Cross-project skill improvement lessons | skill `references/lessons-from-history.md` |
-| Reminder for where to look | memory |
-
-## Key Features
-
-### 1. Task-Driven Development
-
-- Each session focuses on ONE task
-- Tasks have clear steps and acceptance criteria
-- Dependencies are respected
-
-### 2. Verification Gates
-
-- Every implementation task must have `requirement_ref` and `design_ref`
-- Behavior changes update docs before code unless the user explicitly confirms skipping docs
-- All changes must pass `npm run lint`
-- All changes must pass `npm run build`
-- UI changes require browser testing with MCP Playwright
-- Verifier rejects passing code when docs are missing or stale
-
-### 3. Persistent State
-
-- `task.json` tracks task completion
-- `progress.txt` preserves context, documentation updates, and testing evidence across sessions
-- Future agents can understand what was done
-
-### 4. Blocking Protocol
-
-When a task cannot be completed:
-- Agent documents the block in `progress.txt`
-- No commit is made
-- Clear instructions for human intervention
-
-### 5. Atomic Commits
-
-All changes are committed together:
-- Code changes
-- `progress.txt` update
-- `task.json` update
+User's latest explicit instruction
+> PROJECT.md / docs/* / task.json / progress.txt
+> CLAUDE.md / architecture.md
+> skill instructions
+> memory hints
+```
 
 ## Scripts
 
-### select_next_task.py
-
-Select the next ready task from `task.json`:
+### validate_architecture.py
 
 ```bash
-python skills/coding-workflow/scripts/select_next_task.py --task-file task.json
+python scripts/validate_architecture.py --architecture-file architecture.md
 ```
 
-Options:
-- `--format json` - Output as JSON
-- `--allow-blocked` - Include blocked tasks
-
-### validate_iteration.py
-
-Validate task completion:
-
-```bash
-python skills/coding-workflow/scripts/validate_iteration.py --task-id 1
-```
-
-Options:
-- `--task-file` - Path to task.json
-- `--progress-file` - Path to progress.txt
-- `--project-dir` - Project directory for lint/build
-- `--skip-lint` - Skip lint check
-- `--skip-build` - Skip build check
-
-## Best Practices
-
-### For Humans
-
-1. **Write clear task descriptions** - Each task should be completable in one session
-2. **Define dependencies** - Help the agent understand task order
-3. **Provide working init.sh** - Ensure environment is reproducible
-4. **Document architecture** - Help agents understand the system
-5. **Keep requirements/design current** - Tasks should point to the docs they implement
-
-### For Agents
-
-1. **Pass the Documentation Gate** - Identify requirement/design references before source edits
-2. **Read before writing** - Understand existing patterns
-3. **Test thoroughly** - Never skip verification
-4. **Document in progress.txt** - Help future agents
-5. **Block, don't fake** - Be honest about blockers
+Checks `architecture.md` for all required sections.
 
 ## License
 
