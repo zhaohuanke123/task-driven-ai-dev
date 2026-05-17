@@ -1,0 +1,55 @@
+{
+  "skill_name": "coding-workflow",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "帮我初始化一个新项目，这是一个用 React + TypeScript + Tailwind 做前端、Node.js + Express 做后端、PostgreSQL 做数据库的全栈博客系统。项目名叫 BlogEngine。",
+      "expected_output": "运行 install.py 部署 4 个架构文件（CLAUDE.md、architecture.md、task.json、progress.txt），占位符已替换为项目信息。",
+      "files": [],
+      "expectations": [
+        "部署了 CLAUDE.md 文件且包含项目名 BlogEngine",
+        "部署了 architecture.md 文件且 Tech Stack 表格包含 React",
+        "部署了 task.json 文件且有 3 个任务",
+        "部署了 progress.txt 文件",
+        "使用了 install.py 脚本进行部署",
+        "architecture.md 通过了 validate_architecture.py 验证"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "帮我看看当前项目的开发进度，项目在 evals/fixtures/initialized-project/ 目录下。",
+      "expected_output": "读取 task.json 和 progress.txt，汇报已完成 1 个任务、剩余 2 个任务，下一个可执行的是 Task #2 Database Schema。",
+      "files": [
+        "evals/fixtures/initialized-project/CLAUDE.md",
+        "evals/fixtures/initialized-project/architecture.md",
+        "evals/fixtures/initialized-project/task.json",
+        "evals/fixtures/initialized-project/progress.txt"
+      ],
+      "expectations": [
+        "正确汇报已完成任务数（1个）和剩余任务数（2个）",
+        "识别出下一个可执行任务是 Task #2 Database Schema",
+        "读取了 task.json 和 progress.txt",
+        "明确提到了 Task #1 已完成、Task #2 和 Task #3 未完成"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "继续开发 evals/fixtures/initialized-project/ 目录下的项目。先完成 Task #2 Database Schema。注意这个项目还没有 git 初始化，也没有 worktree，但你要按照 Documentation Gate 流程来做：先检查文档引用，确认架构约束，然后实现任务。如果没有 git，直接在当前目录编码就行。",
+      "expected_output": "按照 Documentation Gate 流程：1) 读取 CLAUDE.md 和 architecture.md，2) 确认 Task #2 的 docs 引用（docs/design.md#Data Model），3) 创建 docs/design.md 定义 Data Model，4) 实现数据库 schema（user table + post table + migration），5) 标记任务完成。",
+      "files": [
+        "evals/fixtures/initialized-project/CLAUDE.md",
+        "evals/fixtures/initialized-project/architecture.md",
+        "evals/fixtures/initialized-project/task.json",
+        "evals/fixtures/initialized-project/progress.txt"
+      ],
+      "expectations": [
+        "读取了 CLAUDE.md 和 architecture.md 确认约束",
+        "检查了 Task #2 的 docs 字段或创建了相关文档",
+        "在编码前确认了 Documentation Gate",
+        "创建了数据库 schema 相关文件（如 migration 或 schema SQL）",
+        "更新了 task.json 将 Task #2 标记为 done: true",
+        "更新了 progress.txt 记录了完成情况"
+      ]
+    }
+  ]
+}

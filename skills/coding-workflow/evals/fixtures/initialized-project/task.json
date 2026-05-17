@@ -1,0 +1,26 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Environment Setup",
+      "steps": ["Create package.json", "Set up TypeScript", "Create folder structure"],
+      "dependencies": [],
+      "done": true
+    },
+    {
+      "id": 2,
+      "title": "Database Schema",
+      "steps": ["Define user table", "Define post table", "Create migration"],
+      "dependencies": [1],
+      "done": false,
+      "docs": "docs/design.md#Data Model"
+    },
+    {
+      "id": 3,
+      "title": "User Authentication API",
+      "steps": ["Create POST /api/auth/register", "Create POST /api/auth/login", "Add JWT middleware"],
+      "dependencies": [2],
+      "done": false
+    }
+  ]
+}
