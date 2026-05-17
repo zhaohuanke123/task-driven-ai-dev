@@ -142,6 +142,7 @@ python install.py --target <project-dir> --name "Project Name" \
    - 用户请求新行为 → 先更新文档
    - 没有对应文档 → 先创建最小文档
 3. Documentation Gate 通过后进入 PEV 流程
+4. 如果确认不需要改文档（纯 bug fix），在 `progress.txt` 写入 `[DOC-GATE-BYPASS] Task #<id>: 纯 bug fix，文档已定义正确行为` 以绕过 Hook 拦截
 
 ---
 
@@ -162,6 +163,8 @@ python install.py --target <project-dir> --name "Project Name" \
 | 文档更新 | 行为变化时文档已先更新 |
 
 不通过 → 先补文档，不进入 PEV 流程。
+
+**机械化执行：** PreToolUse Hook（`.claude/hooks/doc-gate.sh`）会在 Edit/Write 源码文件时自动检查 git diff 中是否有文档变更。无文档变更且无 BYPASS 记录 → 拦截（exit 2）。BYPASS 通过 `progress.txt` 中 `[DOC-GATE-BYPASS] Task #<id>: <原因>` 绕过，绑定当前任务 ID。
 
 ### Step 3: Worktree 创建
 
@@ -316,6 +319,7 @@ git commit -m "complete task #<id>: <title>"
 8. **测试由验证者编写** — executor 不跑 test，verifier 独立编写和运行测试
 9. **阻塞不伪造** — 无法完成时报告阻塞，不标记 done
 10. **反馈循环有界** — 最多 2 轮重试，超出则报告用户
+11. **Documentation Gate 机械化执行** — PreToolUse Hook（`.claude/hooks/doc-gate.sh`）拦截未经文档更新的源码修改。BYPASS 通过 `progress.txt` 中 `[DOC-GATE-BYPASS] Task #<id>: <原因>` 绑定当前任务
 
 ---
 

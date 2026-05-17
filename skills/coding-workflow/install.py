@@ -25,6 +25,7 @@ from typing import Optional
 
 TEMPLATE_DIR = Path(__file__).resolve().parent / "assets" / "templates"
 AGENTS_DIR = Path(__file__).resolve().parent / "assets" / "agents"
+HOOKS_DIR = Path(__file__).resolve().parent / "assets" / "hooks"
 SCRIPTS_DIR = Path(__file__).resolve().parent / "scripts"
 
 TEMPLATES = [
@@ -38,6 +39,10 @@ AGENTS = [
     "planner.md",
     "executor.md",
     "verifier.md",
+]
+
+HOOKS = [
+    "doc-gate.sh",
 ]
 
 
@@ -145,6 +150,76 @@ def deploy(target: Path, info: dict[str, str], overwrite: bool) -> list[str]:
     return deployed
 
 
+def deploy_hooks(target: Path, overwrite: bool) -> list[str]:
+    """Deploy hook scripts and settings.json."""
+    deployed = []
+
+    hooks_target = target / ".claude" / "hooks"
+    hooks_target.mkdir(parents=True, exist_ok=True)
+
+    for name in HOOKS:
+        dest = hooks_target / name
+        if dest.exists() and not overwrite:
+            print(f"  Skipping .claude/hooks/{name} (already exists)")
+            continue
+
+        src = HOOKS_DIR / name
+        if not src.exists():
+            print(f"  WARNING: hook script not found: {src}")
+            continue
+
+        content = src.read_text(encoding="utf-8")
+        dest.write_text(content, encoding="utf-8")
+        deployed.append(f".claude/hooks/{name}")
+        print(f"  Created .claude/hooks/{name}")
+
+    settings_src = TEMPLATE_DIR / ".claude" / "settings.json"
+    settings_dest = target / ".claude" / "settings.json"
+
+    if not settings_src.exists():
+        print(f"  WARNING: settings.json template not found: {settings_src}")
+        return deployed
+
+    if settings_dest.exists():
+        import json
+        try:
+            existing = json.loads(settings_dest.read_text(encoding="utf-8"))
+            new_hooks = json.loads(settings_src.read_text(encoding="utf-8"))
+
+            if "hooks" not in existing:
+                existing["hooks"] = new_hooks.get("hooks", {})
+            else:
+                existing_hooks = existing["hooks"]
+                for event_type, hook_list in new_hooks.get("hooks", {}).items():
+                    if event_type in existing_hooks:
+                        for new_hook in hook_list:
+                            matcher = new_hook.get("matcher", "")
+                            existing_matchers = {
+                                h.get("matcher", "") for h in existing_hooks[event_type]
+                            }
+                            if matcher not in existing_matchers:
+                                existing_hooks[event_type].append(new_hook)
+                    else:
+                        existing_hooks[event_type] = hook_list
+
+            settings_dest.write_text(
+                json.dumps(existing, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+            deployed.append(".claude/settings.json")
+            print("  Updated .claude/settings.json (merged hooks)")
+        except (json.JSONDecodeError, KeyError):
+            print("  WARNING: could not merge settings.json, skipping")
+    else:
+        settings_dest.parent.mkdir(parents=True, exist_ok=True)
+        content = settings_src.read_text(encoding="utf-8")
+        settings_dest.write_text(content, encoding="utf-8")
+        deployed.append(".claude/settings.json")
+        print("  Created .claude/settings.json")
+
+    return deployed
+
+
 def run_validation(target: Path) -> bool:
     """Run validate_architecture.py on the deployed architecture.md."""
     script = SCRIPTS_DIR / "validate_architecture.py"
@@ -206,6 +281,8 @@ def main() -> int:
 
     print("Deploying files...")
     deployed = deploy(target, info, overwrite=args.overwrite)
+    hook_deployed = deploy_hooks(target, overwrite=args.overwrite)
+    deployed.extend(hook_deployed)
 
     if not deployed:
         print("\nNo files deployed.")
@@ -214,6 +291,8 @@ def main() -> int:
     print(f"\nDeployed {len(deployed)} file(s) to {target}")
     print("  - Project files: CLAUDE.md, architecture.md, task.json, progress.txt")
     print("  - PEV agents: .agents/planner.md, .agents/executor.md, .agents/verifier.md")
+    if hook_deployed:
+        print("  - Hooks: .claude/hooks/doc-gate.sh, .claude/settings.json")
 
     # Validate
     if not args.skip_validation:

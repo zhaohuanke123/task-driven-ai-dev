@@ -28,6 +28,14 @@
 3. 如果用户请求新行为，先更新文档再改代码
 4. 如果确认跳过文档，在 `progress.txt` 记录原因和风险
 
+**机械化执行：** Documentation Gate 由 PreToolUse Hook（`.claude/hooks/doc-gate.sh`）强制执行。编辑 `src/` 等源码目录的文件时，如果 git diff 中没有文档变更且 progress.txt 中没有 BYPASS 记录，编辑操作将被拦截。
+
+绕过方式（在 `progress.txt` 中添加）：
+```
+[DOC-GATE-BYPASS] Task #<id>: <原因>
+```
+BYPASS 绑定当前任务 ID，旧任务的 BYPASS 不会对新任务生效。
+
 ---
 
 ## Memory 规则

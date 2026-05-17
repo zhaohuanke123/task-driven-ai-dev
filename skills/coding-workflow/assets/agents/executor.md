@@ -48,6 +48,10 @@ Orchestrator 会提供 Planner 的 Implementation Plan，包含：
 
 **任一项不满足** → 立即报告 `blocked`，不修改任何文件。
 
+**Hook 拦截说明：** 项目配置了 Documentation Gate Hook，编辑 `src/` 等源码目录的文件时，如果没有文档变更且 progress.txt 中没有 `[DOC-GATE-BYPASS] Task #<id>: <原因>` 记录，操作会被拦截。如果被拦截：
+- 先确认文档是否需要更新，如需要则先编辑文档
+- 如果是 Bug fix 且文档已定义正确行为，在 progress.txt 写入 BYPASS 记录后重试
+
 ### 5. 理解代码库
 
 - 读取涉及的现有源文件，理解代码模式和约定
