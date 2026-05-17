@@ -1,219 +1,239 @@
 ---
 name: coding-workflow
 description: |
-  项目初始化器 - 部署 Harness Engineering 架构文件到项目目录，包含 CLAUDE.md、WORKFLOW.md、architecture.md、task.json、progress.txt。
+  项目初始化和多代理编排工作流。部署架构文件（CLAUDE.md、architecture.md、task.json、progress.txt）到目标项目，
+  然后作为 Orchestrator 协调 executor/verifier 子代理完成文档门禁的开发迭代。
   TRIGGER when: 用户说 "初始化项目"、"开始新项目"、"部署架构"；项目缺少 CLAUDE.md 或 WORKFLOW.md。
-  DO NOT TRIGGER when: 项目已有完整的架构文件（CLAUDE.md + WORKFLOW.md + architecture.md）。
+  DO NOT TRIGGER when: 项目已有完整的架构文件。
 license: Apache-2.0
 ---
 
-# Coding Workflow - 项目初始化器
+# Coding Workflow
 
-部署 Harness Engineering 架构文件到项目，让 AI 后续自驱动开发，并把文档先行作为运行时门禁。
+项目初始化 + 多代理编排。一次性部署架构文件，后续 AI 自驱动开发。
 
 ---
 
 ## 核心理念
 
 ```
-Skill 是"安装器"（一次性）
-项目文件是"运行时"（后续自驱动）
+install.py 是"安装器"（一次性部署 4 个项目文件）
+SKILL.md 是"Orchestrator 剧本"（后续自驱动）
 Memory 是"路由提示"（提醒读取项目文件，不保存项目状态）
-
-AI 读取 skill → 部署架构文件 → 后续只读项目文件
 ```
+
+---
 
 ## Memory Is Routing, Not State
 
-Memory can remind an agent to read `CLAUDE.md`, `WORKFLOW.md`, `task.json`, and
-`progress.txt`, but it cannot replace those files.
+Memory 只能提醒 agent 读取 `CLAUDE.md`、`task.json`、`progress.txt`，不能替代这些文件。
 
-Rules:
-- `CLAUDE.md` and `WORKFLOW.md` are runtime entry points.
-- `task.json` is the source of truth for task state.
-- `progress.txt` is the source of truth for execution history, testing evidence, and blocks.
-- `PROJECT.md` and `docs/*` win for lifecycle, requirements, design, and version context.
-- If memory conflicts with repo files, trust repo files.
-
-Recommended memory:
+冲突优先级：
 
 ```text
-For projects using software-dev/coding-workflow: read CLAUDE.md first, then PROJECT.md and WORKFLOW.md. Memory is only a routing hint; repo files are the source of truth. Pass the Documentation Gate before source edits.
+用户最新明确指令
+> PROJECT.md / docs/* / task.json / progress.txt
+> CLAUDE.md / architecture.md
+> skill instructions
+> memory hints
 ```
 
-Conflict examples:
-- Memory says a task is complete, but `task.json` says `passes=false` → the task is incomplete.
-- Memory says direct source edits are allowed, but `WORKFLOW.md` requires Documentation Gate → pass the gate first.
-- Memory recalls an old design, but `docs/design.md` differs → follow `docs/design.md`.
+- memory 说任务完成，但 `task.json` 里 `done: false` → 任务未完成
+- memory 说可以跳过文档，但 architecture.md 要求 Documentation Gate → 先过 gate
+- memory 记得旧设计，但 `docs/design.md` 已更新 → 以 docs 为准
 
 ---
 
-## 触发条件
+## 安装
 
-- 用户说 "初始化项目"、"开始新项目"、"部署架构"
-- 项目缺少 `CLAUDE.md` 或 `WORKFLOW.md`
+```bash
+python install.py --target <project-dir> --name "Project Name" \
+  --description "Brief description" \
+  --tech-frontend "React+TypeScript+Tailwind" \
+  --tech-backend "Node.js" \
+  --tech-database "PostgreSQL"
+```
+
+部署 4 个文件到目标项目：
+- `CLAUDE.md` — 导航入口，新对话自动读取
+- `architecture.md` — 技术栈、目录结构、约束
+- `task.json` — 任务定义和依赖
+- `progress.txt` — 进度日志和测试证据
+
+已有项目只需运行一次。后续开发 AI 自动读取这些文件。
 
 ---
 
-## 安装流程
+## 工作模式
 
-### Step 1: 检查项目状态
+### Mode 1: Continue（默认）
 
-**输入**：项目根目录路径
+用户说 "继续"、"下一个任务"、"开发"：
 
-**操作**：检查以下文件是否存在：
-- `CLAUDE.md`
-- `WORKFLOW.md`
-- `architecture.md`
-- `PROJECT.md`（如项目使用 software-dev 生命周期）
-- `docs/requirements.md`、`docs/design.md`（如项目使用文档先行）
+1. 读取 `task.json` 获取任务列表
+2. 读取 `progress.txt` 了解当前进度
+3. 选择下一个可执行任务（依赖已满足且 `done: false`）
+4. 执行 Documentation Gate
+5. Spawn executor → verifier → 合并
 
-**输出**：文件存在状态列表
+### Mode 2: Status
 
-**检查点 1**：如果检测到部分文件已存在：
-1. 列出已存在的文件及其修改时间
-2. 询问用户：「检测到已有架构文件，选择操作：[覆盖/跳过已存在/取消]」
-3. 根据用户选择执行对应操作
+用户说 "状态"、"进度"：
 
-### Step 2: 收集项目信息
+1. 读取 `task.json` 和 `progress.txt`
+2. 汇报：已完成 / 剩余 / 阻塞的任务
 
-**输入**：用户回答（可选，可能已在初始 prompt 中提供）
+### Mode 3: Specific Task
 
-**操作**：向用户收集以下信息：
-- 项目目标（一句话描述）
-- 技术栈（语言、框架、数据库等）
-- 核心功能（3-5 个主要功能点）
-- 特殊约束（如有）
+用户指定任务 ID：
 
-**智能处理**：如果用户在初始 prompt 中已提供部分信息（如 "这是一个博客系统，使用 React + Node.js"），则：
-1. 提取已提供的信息，跳过对应询问
-2. 只询问未提供的信息项
-3. 确认提取的信息是否正确
+1. 在 `task.json` 中定位任务
+2. 检查依赖是否满足
+3. 作为单任务执行
 
-**输出**：项目信息对象
+### Mode 4: Bug / Behavior Fix
 
-**检查点 2**：逐项询问（或让用户一次性提供）。如果用户选择跳过，使用占位符模板，后续可手动填充。
+用户说 "bug"、"有问题"、"修一下"：
 
-### Step 3: 部署架构文件
+1. 定位相关文档
+2. 判断类型：
+   - 文档已定义正确行为但代码不符 → 记录为 implementation bug
+   - 用户请求新行为 → 先更新文档
+   - 没有对应文档 → 先创建最小文档
+3. Documentation Gate 通过后才进入源码修改
 
-**前置检查**：确认 skill 的模板和脚本目录存在：
-- `assets/templates/` 目录存在
-- `scripts/` 目录存在
+---
 
-如果缺失，报错并终止。
+## Orchestrator 执行流程
 
-**输入**：Step 1 检查结果 + Step 2 项目信息
+### Step 1: 任务选择
 
-**操作**：根据检查结果，按顺序部署文件：
+读取 `task.json`，选第一个 `dependencies` 全部 `done: true` 且自身 `done: false` 的任务。
 
-| 序号 | 文件 | 模板路径 | 说明 |
-|------|------|----------|------|
-| 1 | `CLAUDE.md` | `assets/templates/CLAUDE.md` | 如已存在，询问合并或覆盖 |
-| 2 | `WORKFLOW.md` | `assets/templates/WORKFLOW.md` | 直接复制 |
-| 3 | `architecture.md` | `assets/templates/architecture.md` | 填充项目信息 |
-| 4 | `task.json` | `assets/templates/task.json` | 如不存在则创建 |
-| 5 | `progress.txt` | `assets/templates/progress.txt` | 如不存在则创建 |
+### Step 2: Documentation Gate
 
-**输出**：部署的文件列表
+源码修改前必须确认：
 
-### Step 4: 验证部署
+| 检查项 | 条件 |
+|--------|------|
+| 行为定义 | 任务的预期行为有文档定义（任务 `docs` 字段 或 `docs/requirements.md`） |
+| 架构约束 | 已读取 `architecture.md`，确认技术栈和禁止事项 |
+| 文档更新 | 行为变化时文档已先更新 |
 
-**输入**：`architecture.md` 文件路径
+不通过 → 先补文档，不进入编码。
 
-**操作**：运行验证脚本
+### Step 3: Worktree 创建
+
+```bash
+git worktree add .worktrees/task-<id> -b feature/task-<id>
+```
+
+### Step 4: Spawn Executor
+
+```
+Agent(subagent_type: "executor", isolation: "worktree", prompt: """
+在 worktree .worktrees/task-<id>/ 中实现以下任务。
+
+=== 任务 ===
+- Task ID: <id>
+- Title: <title>
+- Steps: <步骤列表>
+- Docs: <docs 引用，如无则为 "docs/requirements.md">
+
+启动协议：
+1. 读取 CLAUDE.md、architecture.md
+2. 读取任务的 docs
+3. Documentation Gate 自检
+4. 编码并提交
+""")
+```
+
+### Step 5: 处理 Executor 结果
+
+**completed**: 进入验证。
+**blocked**: 清理 worktree，记录到 progress.txt，报告用户。
+
+### Step 6: Spawn Verifier
+
+```
+Agent(subagent_type: "verifier", isolation: "worktree", prompt: """
+验证 worktree .worktrees/task-<id>/ 中的实现。
+
+=== 验证目标 ===
+- Task ID: <id>
+- Title: <title>
+- Steps: <步骤列表>
+- Docs: <docs 引用>
+- Files changed: <executor 报告的文件列表>
+""")
+```
+
+### Step 7: 处理 Verifier 结果
+
+**PASS**: 合并 worktree，更新 `task.json`（`done: true`），记录 `progress.txt`。
+**FAIL/PARTIAL**: 清理 worktree（不合并），记录失败原因。
+
+合并命令：
+
+```bash
+git merge feature/task-<id> --no-edit
+git worktree remove .worktrees/task-<id>
+git branch -d feature/task-<id>
+```
+
+### Step 8: 提交
+
+```bash
+git add task.json progress.txt
+git commit -m "complete task #<id>: <title>"
+```
+
+---
+
+## 阻塞处理
+
+任务无法完成时：
+
+1. 清理 worktree（不合并）
+2. 写入 `progress.txt`：
+   ```
+   ## [YYYY-MM-DD] - Task #N: [Title] - BLOCKED
+   ### Block reason:
+   - [具体原因]
+   ### Human action needed:
+   1. [步骤]
+   ```
+3. 报告用户
+
+---
+
+## Guardrails
+
+1. **文档先行** — 编码前必须通过 Documentation Gate
+2. **Repo 文件优先于 memory** — 冲突时以项目文件为准
+3. **架构优先** — 编码前必须读取 `architecture.md`
+4. **Worktree 隔离** — 每个任务独立 worktree
+5. **验证先于合并** — verifier PASS 才能合并
+6. **阻塞不伪造** — 无法完成时报告阻塞，不标记 done
+7. **并行执行** — 同批次 executor/verifier 可并行 spawn
+
+---
+
+## 项目文件说明
+
+部署到目标项目的 4 个文件：
+
+| 文件 | 职责 | AI 读取时机 |
+|------|------|-------------|
+| `CLAUDE.md` | 导航入口 | 新对话自动读取 |
+| `architecture.md` | 技术栈、目录、约束 | 编码前 |
+| `task.json` | 任务定义和依赖 | 需要知道做什么时 |
+| `progress.txt` | 进度历史和测试证据 | 需要了解上下文时 |
+
+## 验证脚本
+
 ```bash
 python scripts/validate_architecture.py --architecture-file architecture.md
 ```
 
-**输出**：验证结果（通过/失败 + 错误日志）
-
-**检查点 3**：如果验证失败：
-1. 展示错误日志
-2. 询问用户：「验证失败，选择操作：[查看详情并修复/跳过验证/取消]」
-3. 根据选择执行对应操作
-
-### Step 5: 完成提示
-
-**输入**：部署结果
-
-**输出**：用户提示信息
-```
-项目已初始化完成。部署的文件：
-- CLAUDE.md（项目配置和导航入口）
-- WORKFLOW.md（工作流程和 Documentation Gate）
-- architecture.md（架构约束）
-- task.json（任务模板和文档引用）
-
-后续开发：
-- 新对话时，AI 自动读取 CLAUDE.md，再按 WORKFLOW.md 通过 Documentation Gate
-- 不需要再次调用此 skill
-```
-
----
-
-## 已初始化项目
-
-如果项目已有完整的架构文件，告诉用户：
-
-```
-项目已初始化，架构文件完整。
-
-后续开发：
-- 新对话时 AI 自动读取 CLAUDE.md
-- AI 会自动读取 WORKFLOW.md、architecture.md、task.json 和相关 docs
-- 源码修改前必须通过 WORKFLOW.md 中的 Documentation Gate
-- 按渐进式披露原则，按需读取必要文件
-```
-
----
-
-## 部署文件说明
-
-| 文件 | 职责 | AI 读取时机 |
-|------|------|-------------|
-| `CLAUDE.md` | 项目配置和导航入口 | 新对话自动读取 |
-| `WORKFLOW.md` | 工作流程（Orchestrator）和 Documentation Gate | 需要执行任务时 |
-| `executor.md` | Executor 子代理指令 | spawn executor 时 |
-| `verifier.md` | Verifier 子代理指令 | spawn verifier 时 |
-| `architecture.md` | 技术栈、目录结构、约束 | 编码前读取 |
-| `task.json` | 任务定义、依赖、需求/设计引用 | 需要知道做什么时 |
-| `progress.txt` | 开发历史、文档更新、测试证据 | 需要了解上下文时 |
-
----
-
-## 模板文件
-
-所有模板位于 `assets/templates/`：
-
-| 模板 | 用途 |
-|------|------|
-| `CLAUDE.md` | 项目配置和导航入口模板 |
-| `WORKFLOW.md` | 工作流程模板（Orchestrator） |
-| `executor.md` | Executor 子代理指令模板 |
-| `verifier.md` | Verifier 子代理指令模板 |
-| `architecture.md` | 架构约束模板 |
-| `task.json` | 任务定义模板 |
-| `progress.txt` | 进度记录模板 |
-| `init.sh` | 项目初始化脚本 |
-| `project-config.json` | 项目配置模板 |
-
----
-
-## 验证脚本
-
-所有脚本位于 `scripts/`：
-
-| 脚本 | 用途 |
-|------|------|
-| `validate_architecture.py` | 验证 architecture.md 完整性 |
-| `validate_iteration.py` | 验证迭代一致性 |
-| `plan_batches.py` | 分析任务依赖和并行批次 |
-| `select_next_task.py` | 选择下一个可执行任务 |
-
----
-
-## 参考文档
-
-| 文档 | 用途 |
-|------|------|
-| `references/frontend-best-practices.md` | 前端开发最佳实践 |
+机械化检查 architecture.md 是否有所有必需章节。
