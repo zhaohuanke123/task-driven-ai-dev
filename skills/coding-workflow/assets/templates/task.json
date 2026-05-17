@@ -1,34 +1,21 @@
 {
-  "project": "Project Name",
-  "description": "Brief project description",
-  "version": "1.0.0",
   "tasks": [
     {
       "id": 1,
       "title": "Environment Setup",
-      "description": "Initialize project dependencies and configuration",
       "steps": [
         "Create package.json with required dependencies",
         "Set up TypeScript configuration",
-        "Configure Tailwind CSS",
+        "Configure CSS framework",
         "Create basic folder structure",
-        "Add .env.local.example with required variables"
+        "Add .env.example with required variables"
       ],
-      "passes": false,
-      "requirement_ref": "docs/requirements.md#FR-001",
-      "design_ref": "docs/design.md#Project Structure",
-      "docs_updated": false,
-      "implementation_done": false,
-      "verified": false,
-      "priority": "critical",
       "dependencies": [],
-      "files": ["package.json", "tsconfig.json", "tailwind.config.ts", ".env.local.example"],
-      "conflict_groups": ["config"]
+      "done": false
     },
     {
       "id": 2,
       "title": "Database Schema",
-      "description": "Create database tables and relationships",
       "steps": [
         "Define user table schema",
         "Define core entity tables",
@@ -36,47 +23,23 @@
         "Create migration files",
         "Add seed data for development"
       ],
-      "passes": false,
-      "requirement_ref": "docs/requirements.md#FR-002",
-      "design_ref": "docs/design.md#Data Model",
-      "docs_updated": false,
-      "implementation_done": false,
-      "verified": false,
-      "priority": "high",
       "dependencies": [1],
-      "files": ["supabase/migrations/"],
-      "conflict_groups": []
+      "done": false,
+      "docs": "docs/design.md#Data Model"
     },
     {
       "id": 3,
-      "title": "Authentication UI",
-      "description": "Implement login and registration pages",
+      "title": "Authentication",
       "steps": [
-        "Create /login page component",
-        "Create /register page component",
+        "Create login page",
+        "Create registration page",
         "Implement form validation",
         "Connect to auth API",
-        "Add error handling and feedback"
+        "Add error handling"
       ],
-      "passes": false,
-      "requirement_ref": "docs/requirements.md#FR-003",
-      "design_ref": "docs/design.md#Authentication Flow",
-      "docs_updated": false,
-      "implementation_done": false,
-      "verified": false,
-      "priority": "high",
       "dependencies": [1, 2],
-      "files": ["src/app/login/", "src/app/register/", "src/components/auth/"],
-      "conflict_groups": ["ui"],
-      "testing": "browser"
+      "done": false,
+      "docs": "docs/design.md#Authentication Flow"
     }
-  ],
-  "metadata": {
-    "created": "YYYY-MM-DD",
-    "tech_stack": {
-      "frontend": "Next.js + TypeScript + Tailwind",
-      "backend": "Next.js API Routes",
-      "database": "PostgreSQL/Supabase"
-    }
-  }
+  ]
 }

@@ -18,10 +18,10 @@
 
 | Layer | Technology | Reason |
 |-------|------------|--------|
-| Frontend | [例如: Next.js 14+ (App Router) + TypeScript + Tailwind CSS] | [为什么选择] |
-| Backend | [例如: Next.js API Routes] | [为什么选择] |
-| Database | [例如: PostgreSQL/Supabase] | [为什么选择] |
-| Auth | [例如: Supabase Auth] | [为什么选择] |
+| Frontend | [例如: React + TypeScript + Tailwind] | [选择理由] |
+| Backend | [例如: Node.js + Express] | [选择理由] |
+| Database | [例如: PostgreSQL] | [选择理由] |
+| Auth | [例如: JWT / Supabase Auth] | [选择理由] |
 
 ---
 
@@ -31,17 +31,15 @@
 
 ```
 /
-├── AGENTS.md              # 导航入口（subagent 首先读取）
-├── WORKFLOW.md            # 工作流程和 Documentation Gate
+├── CLAUDE.md              # 导航入口
+├── architecture.md        # 本文件 - 架构约束
+├── task.json              # 任务定义和依赖
+├── progress.txt           # 进度历史和测试证据
 ├── PROJECT.md             # 项目状态（如使用 software-dev）
-├── docs/                  # 文档先行体系（如使用 software-dev）
+├── docs/                  # 生命周期文档（如使用 software-dev）
 │   ├── requirements.md    # 行为和范围要求
 │   ├── design.md          # 模块设计和接口契约
 │   └── architecture.md    # 系统架构和数据流
-├── architecture.md        # 本文件 - 架构约束
-├── task.json              # 任务定义和文档引用
-├── progress.txt           # 开发历史、文档更新、测试证据
-├── init.sh                # 环境初始化脚本
 ├── src/
 │   ├── app/               # [例如: Next.js App Router 页面]
 │   │   ├── api/           # API 路由
@@ -50,8 +48,6 @@
 │   │   ├── ui/            # 基础 UI 组件
 │   │   └── features/      # 功能特定组件
 │   ├── lib/               # 工具和辅助函数
-│   │   ├── db/            # 数据库访问层
-│   │   └── utils.ts       # 通用工具
 │   ├── hooks/             # 自定义 React hooks
 │   └── types/             # TypeScript 类型定义
 └── public/                # 静态资源
