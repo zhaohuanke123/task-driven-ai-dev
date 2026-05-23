@@ -1,176 +1,191 @@
 # Vanko Skill
 
-A Claude Code skills marketplace containing personal AI development utilities.
+Claude Code 个人技能集合，包含开发工作流、交互式学习、Skill 制作等实用工具。
 
-## Available Skills
+## Skills 概览
+
+| Skill | 类型 | 说明 |
+|-------|------|------|
+| [task-driven-ai-dev](#task-driven-ai-dev) | 任务驱动 | 任务驱动的 AI 开发循环，持久化规划文档 + 单任务执行 + 验证门 |
+| [coding-workflow](#coding-workflow) | 开发流程 | 项目初始化 + PEV 三层 Agent 编排（Planner → Executor → Verifier） |
+| [software-dev](#software-dev) | 开发流程 | 10 阶段全生命周期，文档驱动 + 阶段门控 |
+| [interactive-learning](#interactive-learning) | 交互学习 | Bloom 掌握学习 + 费曼验证 + 艾宾浩斯复习 |
+| [book-interactive-learning](#book-interactive-learning) | 交互学习 | 书籍交互式学习：诊断盲点 → 拆解骨架 → 按痛点重排学习路径 |
+| [skill-creator](#skill-creator) | Skill 制作 | 指导创建符合 Claude Code 规范的 Skill |
+
+---
+
+## Skill 详情
 
 ### task-driven-ai-dev
 
-Turn a repository into a task-driven AI delivery loop with durable planning artifacts, guarded single-task execution, progress logging, and validation gates.
+将仓库变为任务驱动的 AI 交付循环，通过持久化规划文档、受保护的单任务执行、进度日志和验证门来确保交付质量。
 
 **Features:**
-- **Architecture Documentation**: Maintain system overview, constraints, and integration boundaries
-- **Task Management**: Track backlog with dependencies, blocked state, and validation notes
-- **Progress Logging**: Dated execution log with testing evidence
-- **Project Configuration**: Repo-specific commands and artifact paths
-- **Git Integration**: Automatic commit after task completion
+- **架构文档管理**：维护系统概览、约束条件和集成边界
+- **任务管理**：追踪带依赖关系、阻塞状态和验证记录的待办列表
+- **进度日志**：按日期记录执行日志及测试证据
+- **项目配置**：仓库级命令和产物路径配置
+- **Git 集成**：任务完成后自动提交
 
 ### coding-workflow
 
-A structured development workflow for fullstack projects with documentation gates, verification gates, persistent state, and browser testing integration.
+面向全栈项目的结构化开发工作流，包含文档门、验证门、持久状态和浏览器测试集成。采用 PEV（Plan-Execute-Verify）三层 Agent 架构。
 
 **Features:**
-- **Task Selection**: Automatically select next incomplete task from task.json
-- **Documentation Gate**: Require task-level requirement/design references before implementation
-- **Memory Adapter Rule**: Treat memory as a routing hint; repo files remain the source of truth
-- **Implementation Guidance**: Follow existing docs, code patterns, and conventions
-- **Testing Gates**: Lint, build, browser testing, and docs/code/tests consistency checks
-- **Progress Documentation**: Persistent session history, documentation updates, and skip-risk records in progress.txt
-- **Blocking Protocol**: Clear handling of tasks that require human intervention
-- **Rollback Support**: Clean recovery from failed implementations
-
-### interactive-learning
-
-Interactive learning system based on Bloom's "2 Sigma Problem" and mastery learning principles.
-
-**Features:**
-- **Dialog-Based Verification**: AI generates questions dynamically, asks follow-up questions to verify understanding
-- **Mastery Learning**: Only proceed when truly understanding (L3 application level)
-- **Branch Exploration**: Dive deep into concepts that interest you, return to main path anytime
-- **Progress Tracking**: Resume learning across conversations, never lose context
-- **Feynman Method**: Learn by explaining, AI helps you find knowledge gaps
-- **Error Correction**: Correct AI mistakes, make learning a collaborative process
-- **Source Citations**: Generate courses based on your documents, books, or websites with proper citations
-- **Obsidian Integration**: Auto-add `^block-id` for precise note references
-- **Spaced Repetition**: Ebbinghaus forgetting curve review system (20min, 1h, 1d, 2d, 6d, 31d)
+- **任务选择**：自动从 task.json 选取下一个未完成任务
+- **文档门**：实现前要求任务级需求/设计参考
+- **Memory 路由规则**：Memory 仅作路由提示，仓库文件为事实来源
+- **实现引导**：遵循已有文档、代码模式和约定
+- **测试门**：Lint、构建、浏览器测试、文档/代码/测试一致性检查
+- **进度文档**：持久化会话历史、文档更新、跳过风险记录
+- **阻塞协议**：清晰处理需要人工介入的任务
+- **回滚支持**：从失败实现中干净恢复
 
 ### software-dev
 
-Guides AI agents through the complete software development lifecycle with phase-gated, document-driven execution. Designed for small/demo projects that need fast iteration with disciplined delivery.
+10 阶段全生命周期指导：问题定义 → 需求 → 规划 → 架构 → 设计 → 编码 → 单元测试 → 集成 → 系统测试 → 交付。适用于需要快速迭代且有纪律交付的小型/演示项目。
 
 **Features:**
-- **10-Phase Lifecycle**: Problem definition → requirements → planning → architecture → design → coding → unit testing → integration → system testing → delivery
-- **Document-First**: Update documentation before implementation; bug fixes and behavior changes must pass a documentation gate; docs, code, and tests must agree
-- **Progressive Loading**: Compact main file with reference files loaded on demand
-- **Cross-Conversation Persistence**: `PROJECT.md`, `CLAUDE.md`, `AGENTS.md`, and `WORKFLOW.md` preserve context and runtime workflow across sessions
-- **Memory Adapter Policy**: Memory may remind agents where to start, but cannot replace project state or docs
-- **Git Integration**: Commits, tags, and rollback built into every phase
-- **Recovery Protocol**: Exception handling for missing files, dirty worktrees, and abandoned projects
+- **10 阶段生命周期**：完整的阶段门控流程
+- **文档优先**：实现前先更新文档；Bug 修复和行为变更必须通过文档门；文档、代码、测试必须一致
+- **渐进加载**：紧凑的主文件 + 按需加载的参考文件
+- **跨会话持久化**：`PROJECT.md`、`CLAUDE.md`、`AGENTS.md`、`WORKFLOW.md` 跨会话保持上下文
+- **Memory 适配策略**：Memory 可提醒起始点，但不替代项目状态或文档
+- **Git 集成**：每个阶段内置提交、标签和回滚
+- **恢复协议**：处理文件缺失、脏工作树和废弃项目
 
-## Installation
+### interactive-learning
 
-### From GitHub Marketplace
+基于 Bloom "2 Sigma 问题"理论和掌握学习原则的交互式学习系统。
 
-```shell
-/plugin marketplace add zhaohuanke123/vanko-skill
-```
+**Features:**
+- **对话式验证**：AI 动态生成问题，追问验证理解程度
+- **掌握学习**：真正理解（L3 应用级）后才继续
+- **分支探索**：深入感兴趣的概念，随时回到主线
+- **跨会话进度**：新对话也能恢复学习上下文
+- **费曼方法**：通过解释来学习，AI 帮你发现知识盲点
+- **纠错机制**：纠正 AI 错误，让学习成为协作过程
+- **来源引用**：基于文档、书籍或网站生成课程
+- **Obsidian 集成**：自动添加 `^block-id` 精确笔记引用
+- **艾宾浩斯复习**：间隔重复复习系统（20min, 1h, 1d, 2d, 6d, 31d）
 
-### Install Specific Skills
+### book-interactive-learning
 
-```shell
-# Task-driven AI development
-/plugin install task-driven-ai-dev@zhaohuanke123-vanko-skill
+用 Claude Code 高效读书的交互式学习系统。核心方法：诊断盲点 → 拆解书籍骨架 → 按痛点重排学习路径。
 
-# Coding workflow
-/plugin install coding-workflow@zhaohuanke123-vanko-skill
+**Features:**
+- **诊断盲点**：通过诊断题精准定位知识薄弱点
+- **书籍拆解**：自动提取书籍骨架结构
+- **个性路径**：根据痛点重新排列学习顺序
+- **单元学习**：按拆解后的单元逐步推进
+- **格式转换**：支持 Word 文档转 Markdown
 
-# Interactive learning
-/plugin install interactive-learning@zhaohuanke123-vanko-skill
+### skill-creator
 
-# Software development lifecycle
-/plugin install software-dev@zhaohuanke123-vanko-skill
-```
+指导创建符合 Claude Code 规范的 Skill，包含完整的开发工作流、合规检查清单、语言优化规范和多类型模板。
 
-### Local Development
+**Features:**
+- **6 步工作流**：需求确认 → Frontmatter 设计 → 正文编写 → 合规检查 → 辅助文件 → 输出
+- **合规检查**：12 项验证清单确保 Skill 规范
+- **语言优化**：8 类冗余消除规则，确保高信息密度
+- **模板参考**：引用型、任务型、子代理型、参数化型、动态注入型 5 种模板
+- **详细参考**：完整字段说明、作用域优先级、生命周期管理
+
+---
+
+## 安装
+
+### 方式一：复制到个人 Skills 目录（推荐）
 
 ```bash
 git clone https://github.com/zhaohuanke123/vanko-skill.git
-claude --plugin-dir ./vanko-skill
+
+# 复制需要的 skill 到个人目录（所有项目可用）
+cp -r vanko-skill/skills/task-driven-ai-dev ~/.claude/skills/
+cp -r vanko-skill/skills/coding-workflow ~/.claude/skills/
+cp -r vanko-skill/skills/interactive-learning ~/.claude/skills/
+cp -r vanko-skill/skills/software-dev ~/.claude/skills/
+cp -r vanko-skill/skills/book-interactive-learning ~/.claude/skills/
+cp -r vanko-skill/skills/skill-creator-gd ~/.claude/skills/skill-creator
 ```
 
-## Usage
+### 方式二：复制到项目 Skills 目录
 
-```shell
-# Task-driven AI development
-/task-driven-ai-dev:task-driven-ai-dev
-
-# Coding workflow
-/coding-workflow:coding-workflow
-
-# Interactive learning
-/interactive-learning:interactive-learning
-
-# Software development lifecycle
-/software-dev:software-dev
+```bash
+# 复制到特定项目的 .claude/skills/ 目录（仅该项目可用）
+cp -r vanko-skill/skills/coding-workflow /your-project/.claude/skills/
 ```
 
-## Required Artifacts
+### 方式三：通过 --add-dir 加载
 
-### For software-dev
+```bash
+claude --add-dir /path/to/vanko-skill/skills/coding-workflow
+```
 
-| File | Purpose |
-|------|---------|
-| `PROJECT.md` | Single source of truth for project state, phase, and version |
-| `CLAUDE.md` | Generic agent entry point for cross-session persistence |
-| `AGENTS.md` | Runtime navigation entry for future agents |
-| `WORKFLOW.md` | Execution workflow and documentation gate |
-| `docs/problem-definition.md` | Problem statement and success criteria |
-| `docs/requirements.md` | Functional and non-functional requirements |
-| `docs/plan.md` | Stack, milestones, risks, version strategy |
-| `docs/architecture.md` | Components and data flow |
-| `docs/design.md` | Module design and contracts |
-| `docs/test-results.md` | Verification results |
-| `docs/version-history.md` | Release and rollback history |
-| `docs/lessons-learned.md` | Reusable lessons |
+## 使用
 
-Memory may remind agents to read these files, but the files remain the source of truth.
+安装后在 Claude Code 对话中通过 `/skill-name` 调用：
 
-### For task-driven-ai-dev
+```
+/task-driven-ai-dev          # 任务驱动 AI 开发
+/coding-workflow             # 编码工作流（PEV 编排）
+/software-dev                # 软件开发全生命周期
+/interactive-learning        # 交互式学习
+/book-interactive-learning   # 书籍交互式学习
+/skill-creator               # Skill 开发制作
+```
 
-| File | Purpose |
-|------|---------|
-| `architecture.md` | System overview, constraints, integration boundaries |
-| `task.json` | Backlog source of truth with task definitions |
-| `progress.txt` | Dated execution log with evidence |
-| `project-config.json` | Repo-specific commands and artifact paths |
+每个 Skill 也会根据描述中的触发条件被 Claude 自动加载。
 
-### For coding-workflow
+## 产物文件
 
-| File | Purpose |
-|------|---------|
-| `AGENTS.md` | Runtime navigation entry |
-| `WORKFLOW.md` | Execution workflow and documentation gate |
-| `task.json` | Task definitions with steps, completion status, and document references |
-| `progress.txt` | Session history, documentation updates, and skip-risk records |
-| `architecture.md` | System design decisions |
-| `init.sh` | Environment setup script |
+### software-dev
 
-### For interactive-learning
+| 文件 | 用途 |
+|------|------|
+| `PROJECT.md` | 项目状态、阶段、版本的事实来源 |
+| `CLAUDE.md` | 跨会话持久化的通用 Agent 入口 |
+| `AGENTS.md` | 未来 Agent 的运行时导航入口 |
+| `WORKFLOW.md` | 执行工作流和文档门 |
+| `docs/problem-definition.md` | 问题描述和成功标准 |
+| `docs/requirements.md` | 功能和非功能需求 |
+| `docs/plan.md` | 技术栈、里程碑、风险、版本策略 |
+| `docs/architecture.md` | 组件和数据流 |
+| `docs/design.md` | 模块设计和契约 |
+| `docs/test-results.md` | 验证结果 |
+| `docs/version-history.md` | 发布和回滚历史 |
+| `docs/lessons-learned.md` | 可复用的经验教训 |
 
-| File | Purpose |
-|------|---------|
-| `进度.md` | Learning progress and current state |
-| `知识图谱.md` | Learning path and concept relationships |
-| `复习计划.md` | Spaced repetition review schedule |
-| `参考资料.md` | Source materials library for the topic |
-| `books/` | Local books and documents (PDF, MD, TXT) |
-| `XX_标题.md` | Course files with content and checkpoint records |
-| `config.json` | Learning directory and teaching settings |
+### task-driven-ai-dev
 
-**Source Materials (Optional):**
-| Type | Example |
-|------|---------|
-| Local files | `./books/guide.pdf` |
-| Obsidian notes | `[[notes/topic]]` |
-| Websites | `https://example.com/article` |
-| Books | `《Book Name》Chapter X` |
+| 文件 | 用途 |
+|------|------|
+| `architecture.md` | 系统概览、约束、集成边界 |
+| `task.json` | 待办列表事实来源 |
+| `progress.txt` | 按日期的执行日志及证据 |
+| `project-config.json` | 仓库级命令和产物路径 |
 
-**Review Commands:**
-| Command | Description |
-|---------|-------------|
-| `复习` | Start reviewing due courses |
-| `今日复习` | View today's review tasks |
-| `复习计划` | View full review schedule |
+### coding-workflow
+
+| 文件 | 用途 |
+|------|------|
+| `AGENTS.md` | 运行时导航入口 |
+| `WORKFLOW.md` | 执行工作流和文档门 |
+| `task.json` | 任务定义（步骤、状态、文档引用） |
+| `progress.txt` | 会话历史、文档更新、跳过风险记录 |
+| `architecture.md` | 系统设计决策 |
+
+### interactive-learning
+
+| 文件 | 用途 |
+|------|------|
+| `进度.md` | 学习进度和当前状态 |
+| `知识图谱.md` | 学习路径和概念关系 |
+| `复习计划.md` | 艾宾浩斯复习计划 |
+| `参考资料.md` | 主题的来源材料库 |
+| `XX_标题.md` | 课程文件（含内容和检查站记录） |
+| `config.json` | 学习目录和教学设置 |
 
 ## License
 
