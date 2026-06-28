@@ -9,8 +9,7 @@ Claude Code 个人技能集合，包含开发工作流、交互式学习、Skill
 | [task-driven-ai-dev](#task-driven-ai-dev) | 任务驱动 | 任务驱动的 AI 开发循环，持久化规划文档 + 单任务执行 + 验证门 |
 | [coding-workflow](#coding-workflow) | 开发流程 | 项目初始化 + PEV 三层 Agent 编排（Planner → Executor → Verifier） |
 | [software-dev](#software-dev) | 开发流程 | 10 阶段全生命周期，文档驱动 + 阶段门控 |
-| [interactive-learning](#interactive-learning) | 交互学习 | Bloom 掌握学习 + 费曼验证 + 艾宾浩斯复习 |
-| [book-interactive-learning](#book-interactive-learning) | 交互学习 | 书籍交互式学习：诊断盲点 → 拆解骨架 → 按痛点重排学习路径 |
+| [interactive-learning](#interactive-learning) | 交互学习 | Bloom 掌握学习 + 盲点诊断 + 骨架精读 + 费曼验证 + 艾宾浩斯复习 |
 | [skill-creator](#skill-creator) | Skill 制作 | 指导创建符合 Claude Code 规范的 Skill |
 
 ---
@@ -60,6 +59,8 @@ Claude Code 个人技能集合，包含开发工作流、交互式学习、Skill
 基于 Bloom "2 Sigma 问题"理论和掌握学习原则的交互式学习系统。
 
 **Features:**
+- **盲点诊断**：开始前用诊断题探测"以为懂其实不懂"，按盲点重排学习路径（L1-L5 分级）
+- **骨架精读**：整本书 / 长文档等大材料自动精读成带原文回溯的骨架
 - **对话式验证**：AI 动态生成问题，追问验证理解程度
 - **掌握学习**：真正理解（L3 应用级）后才继续
 - **分支探索**：深入感兴趣的概念，随时回到主线
@@ -69,17 +70,6 @@ Claude Code 个人技能集合，包含开发工作流、交互式学习、Skill
 - **来源引用**：基于文档、书籍或网站生成课程
 - **Obsidian 集成**：自动添加 `^block-id` 精确笔记引用
 - **艾宾浩斯复习**：间隔重复复习系统（20min, 1h, 1d, 2d, 6d, 31d）
-
-### book-interactive-learning
-
-用 Claude Code 高效读书的交互式学习系统。核心方法：诊断盲点 → 拆解书籍骨架 → 按痛点重排学习路径。
-
-**Features:**
-- **诊断盲点**：通过诊断题精准定位知识薄弱点
-- **书籍拆解**：自动提取书籍骨架结构
-- **个性路径**：根据痛点重新排列学习顺序
-- **单元学习**：按拆解后的单元逐步推进
-- **格式转换**：支持 Word 文档转 Markdown
 
 ### skill-creator
 
@@ -96,7 +86,21 @@ Claude Code 个人技能集合，包含开发工作流、交互式学习、Skill
 
 ## 安装
 
-### 方式一：复制到个人 Skills 目录（推荐）
+### 方式一：通过 skills 安装器（推荐）
+
+使用 [vercel-labs/skills](https://github.com/vercel-labs/skills) 一行命令安装单个 skill，无需手动复制：
+
+```bash
+# 安装单个 skill（以 interactive-learning 为例）
+npx skills add zhaohuanke123/vanko-skill@interactive-learning
+
+# 全局安装（所有项目可用，-g）；-y 跳过确认
+npx skills add zhaohuanke123/vanko-skill@interactive-learning -g -y
+```
+
+> 也可用 `npx add-skill zhaohuanke123/vanko-skill`。
+
+### 方式二：git clone + 手动复制
 
 ```bash
 git clone https://github.com/zhaohuanke123/vanko-skill.git
@@ -106,21 +110,20 @@ cp -r vanko-skill/skills/task-driven-ai-dev ~/.claude/skills/
 cp -r vanko-skill/skills/coding-workflow ~/.claude/skills/
 cp -r vanko-skill/skills/interactive-learning ~/.claude/skills/
 cp -r vanko-skill/skills/software-dev ~/.claude/skills/
-cp -r vanko-skill/skills/book-interactive-learning ~/.claude/skills/
 cp -r vanko-skill/skills/skill-creator-gd ~/.claude/skills/skill-creator
 ```
 
-### 方式二：复制到项目 Skills 目录
+### 方式三：复制到项目 Skills 目录
 
 ```bash
 # 复制到特定项目的 .claude/skills/ 目录（仅该项目可用）
-cp -r vanko-skill/skills/coding-workflow /your-project/.claude/skills/
+cp -r vanko-skill/skills/interactive-learning /your-project/.claude/skills/
 ```
 
-### 方式三：通过 --add-dir 加载
+### 方式四：通过 --add-dir 加载
 
 ```bash
-claude --add-dir /path/to/vanko-skill/skills/coding-workflow
+claude --add-dir /path/to/vanko-skill/skills/interactive-learning
 ```
 
 ## 使用
@@ -131,8 +134,7 @@ claude --add-dir /path/to/vanko-skill/skills/coding-workflow
 /task-driven-ai-dev          # 任务驱动 AI 开发
 /coding-workflow             # 编码工作流（PEV 编排）
 /software-dev                # 软件开发全生命周期
-/interactive-learning        # 交互式学习
-/book-interactive-learning   # 书籍交互式学习
+/interactive-learning        # 交互式学习（含盲点诊断、骨架精读）
 /skill-creator               # Skill 开发制作
 ```
 
@@ -180,6 +182,8 @@ claude --add-dir /path/to/vanko-skill/skills/coding-workflow
 
 | 文件 | 用途 |
 |------|------|
+| `诊断报告.md` | 盲点诊断结果（可选，非纯新手时生成） |
+| `骨架/` | 大材料（整本书/长文档）精读骨架（可选） |
 | `进度.md` | 学习进度和当前状态 |
 | `知识图谱.md` | 学习路径和概念关系 |
 | `复习计划.md` | 艾宾浩斯复习计划 |

@@ -60,6 +60,8 @@ AI生成课程时可能"编"细节——形式正确但具体内容有误。这�
 - Markdown 文件
 - TXT 文本文件
 
+> **大材料提示**：当 books/ 里的材料是整本书 / 长文档等大块内容时，直接"提取相关内容"会丢失结构。此时应先调用骨架构建（`docs/skeleton-building.md`）精读成带原文定位的骨架，再基于骨架生成课程。Word 文件先用 `scripts/convert_docx_to_md.sh` 转 MD。
+
 ---
 
 ## 来源类型
